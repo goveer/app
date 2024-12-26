@@ -1,10 +1,10 @@
+'use server'
+
 import { createClient } from '../utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { addToLoops } from '../lib/loops'
 
 export async function signInWithOtp(formData: FormData) {
-  'use server'
-  
   const email = formData.get('email') as string
   const supabase = await createClient()
 
@@ -41,8 +41,6 @@ export async function signInWithOtp(formData: FormData) {
 }
 
 export async function signInWithGoogle() {
-  'use server'
-  
   const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -81,8 +79,6 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
-  'use server'
-
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/')
@@ -90,8 +86,6 @@ export async function signOut() {
 
 // Helper function to get auth status
 export async function getAuthStatus() {
-  'use server'
-  
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   return { user }
