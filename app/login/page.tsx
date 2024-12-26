@@ -8,7 +8,7 @@ export default function LoginPage() {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
             <Image
-              src="/logo.svg"
+              src="/images/veer-logo.svg"
               width={120}
               height={40}
               alt="Veer Logo"
