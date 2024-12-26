@@ -51,55 +51,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign in to continue</CardTitle>
-        <CardDescription>
-          Choose your preferred sign in method
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <form onSubmit={handleOtpSubmit} className="space-y-4">
-            <div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="w-full px-3 py-2 border rounded-md"
-                disabled={isLoading}
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Sending...' : 'Continue with Email'}
-            </Button>
-          </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
+    <Card>
+      <CardContent className="pt-6">
+        <div className="grid gap-6">
           <Button
             type="button"
             variant="outline"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full"
+            className="bg-white"
           >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+            <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -119,6 +81,40 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             </svg>
             Continue with Google
           </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleOtpSubmit}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full px-3 py-2 border rounded-md bg-white"
+                  disabled={isLoading}
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="bg-[#6c5dd3] hover:bg-[#6c5dd3]/90 w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Continue with Email'}
+              </Button>
+            </div>
+          </form>
 
           {message && (
             <div className={`p-3 rounded-md text-sm ${
