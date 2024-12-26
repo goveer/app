@@ -5,32 +5,32 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 0%;
  
-    --primary: 262 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 256 59% 59%;
+    --primary-foreground: 0 0% 100%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 245 100% 98%;
+    --secondary-foreground: 256 59% 59%;
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 245 100% 98%;
+    --muted-foreground: 256 59% 59%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 245 100% 98%;
+    --accent-foreground: 256 59% 59%;
  
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 4 86% 58%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262 83.3% 57.8%;
+    --border: 245 100% 98%;
+    --input: 245 100% 98%;
+    --ring: 256 59% 59%;
  
     --radius: 0.5rem;
   }
@@ -72,7 +72,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(to right, #f8e7ff, #e7f0ff);
   }
 }
 
