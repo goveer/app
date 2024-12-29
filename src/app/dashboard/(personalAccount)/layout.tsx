@@ -1,28 +1,20 @@
-import {createClient} from "@/lib/supabase/server";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
+import { getPersonalAccount } from "@/lib/accounts/get-personal-account"
+import { redirect } from "next/navigation"
 
-export default async function PersonalAccountDashboard({children}: {children: React.ReactNode}) {
+export default async function PersonalAccountLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { data: personalAccount, error } = await getPersonalAccount()
 
-    const supabaseClient = createClient();
+  if (error || !personalAccount) {
+    redirect('/login')
+  }
 
-    const {data: personalAccount, error} = await supabaseClient.rpc('get_personal_account');
-
-    const navigation = [
-        {
-            name: 'Overview',
-            href: '/dashboard',
-        },
-        {
-            name: 'Settings',
-            href: '/dashboard/settings'
-        }
-    ]
-
-    return (
-        <>
-            <DashboardHeader accountId={personalAccount.account_id} navigation={navigation} />
-            <div className="w-full p-8">{children}</div>
-        </>
-    )
-
+  return (
+    <div className="w-full">
+      {children}
+    </div>
+  )
 }

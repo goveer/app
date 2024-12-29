@@ -1,34 +1,32 @@
-import {createClient} from "@/lib/supabase/server";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
-import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
-export default async function PersonalAccountDashboard({children, params: {accountSlug}}: {children: React.ReactNode, params: {accountSlug: string}}) {
-    const supabaseClient = createClient();
+export default async function TeamAccountLayout({
+  children,
+  params: { accountSlug },
+}: {
+  children: React.ReactNode
+  params: { accountSlug: string }
+}) {
+  const supabase = await createClient()
+  const { data: teamAccount, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('slug', accountSlug)
+    .single()
 
-    const {data: teamAccount, error} = await supabaseClient.rpc('get_account_by_slug', {
-        slug: accountSlug
-    });
+  if (error) {
+    console.error('Error fetching team account:', error)
+    redirect('/dashboard')
+  }
 
-    if (!teamAccount) {
-        redirect('/dashboard');
-    }
+  if (!teamAccount) {
+    redirect('/dashboard')
+  }
 
-    const navigation = [
-        {
-            name: 'Overview',
-            href: `/dashboard/${accountSlug}`,
-        },
-        {
-            name: 'Settings',
-            href: `/dashboard/${accountSlug}/settings`
-        }
-    ]
-
-    return (
-        <>
-            <DashboardHeader accountId={teamAccount.account_id} navigation={navigation}/>
-            <div className="w-full p-8">{children}</div>
-        </>
-    )
-
+  return (
+    <div className="w-full">
+      {children}
+    </div>
+  )
 }
