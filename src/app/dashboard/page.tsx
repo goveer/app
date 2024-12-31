@@ -76,6 +76,11 @@ const mockAppointments = [
   }
 ]
 
+export const metadata = {
+  title: 'Dashboard',
+  description: 'Manage your schedule and routes'
+}
+
 export default function DashboardPage() {
   return (
     <SidebarInset>
@@ -99,7 +104,7 @@ export default function DashboardPage() {
         </div>
       </header>
       
-      <div className="flex-1 space-y-8 p-8 pt-6">
+      <div className="flex-1 space-y-8 px-4 sm:px-8 pt-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-[#46296B]">Welcome, Michelle!</h1>
         </div>
@@ -132,7 +137,7 @@ export default function DashboardPage() {
           />
         </StatsContainer>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <AlertCard
             icon={<CalendarX2 className="h-6 w-6" />}
             title="Clients at limit"
@@ -145,7 +150,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <div className="flex flex-col space-y-4">
             <MetricsCard
               title="Travel time savings"

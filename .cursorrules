@@ -1,405 +1,189 @@
+# #Veer Development Guidelines
 
-You are an expert engineer with experience in Nextjs, Supabase,UX/UI, security protocols and HIPAA, and Shadcn/Tailwind. Using the Nextjs Basejump template you will help me restore the project backto working order following the instructions below. You have access to Supabase and Basejump docs for questions.
+## Project Structure
 
-# **<span>Comprehensive Project Development & Rebuild Guide</span>**
+project/\
+├── src/\
+│   ├── app/                    # App router pages\
+│   │   ├── dashboard/          # Dashboard routes\
+│   │   ├── auth/              # Auth routes\
+│   │   ├── login/\
+│   │   └── signup/\
+│   ├── components/\
+│   │   ├── ui/               # Base components\
+│   │   ├── dashboard/        # Dashboard features\
+│   │   ├── auth/            # Auth forms\
+│   │   └── layout/          # Layout components\
+│   ├── lib/                 # Core utilities\
+│   └── hooks/               # Custom hooks
 
-## **<span>1. Initial Setup & Structure</span>**
+## Security Best Practices
 
-<span>**project/**</span>
+- Use `supabase.auth.getUser()` instead of `getSession()`
+- Implement RLS policies for all tables
+- Audit logging for sensitive operations
+- PHI encryption for medical data
+- Session timeouts and management
 
-<span>**├── src/**</span>
+## Component Patterns
 
-<span>**│   ├── app/**</span>
+### Base Component Template
 
-<span>**│   │   ├── dashboard/**</span>
+<span>typescript</span>
 
-<span>**│   │   │   ├── layout.tsx**</span>
+<span>interface ComponentProps extends React.ComponentProps&lt;'div'&gt; {</span>
 
-<span>**│   │   │   ├── page.tsx**</span>
+<span>title: string;</span>
 
-<span>**│   │   │   ├── (personalAccount)/**</span>
+<span>}</span>
 
-<span>**│   │   │   │   ├── layout.tsx**</span>
+<span>export function Component({ title, className, ...props }: ComponentProps) {</span>
 
-<span>**│   │   │   │   ├── settings/**</span>
+<span>if (!title) return null;</span>
 
-<span>**│   │   │   │   └── billing/**</span>
+<span>return (</span>
 
-<span>**│   │   │   └── \[accountSlug\]/**</span>
+<span>&lt;div className={cn('base-styles', className)} {...props}&gt;</span>
 
-<span>**│   │   ├── auth/**</span>
+<span>{/</span> <span>*<span>Content</span>*</span> <span>/}</span>
 
-<span>**│   │   │   └── callback/**</span>
+<span>&lt;/div&gt;</span>
 
-<span>**│   │   ├── login/**</span>
+<span>);</span>
 
-<span>**│   │   └── signup/**</span>
+<span>}</span>
 
-<span>**│   ├── components/**</span>
+### Form Patterns
 
-<span>**│   │   ├── ui/           # shadcn components**</span>
+- Server actions for submissions
+- Client-side validation
+- Loading states
+- Error handling with toast feedback
+- Multi-step form with progress tracking
 
-<span>**│   │   ├── dashboard/    # dashboard specific**</span>
+### Button Effects
 
-<span>**│   │   └── layout/       # layout components**</span>
+- expandIcon: Icon reveal on hover
+- gooeyLeft: Gradient slide effect
+- shineHover: Shine animation
+- ringHover: Border animation
 
-<span>**│   ├── lib/**</span>
+## Styling System
 
-<span>**│   │   ├── actions/**</span>
+### Colors & Theme
 
-<span>**│   │   ├── accounts/**</span>
+Reference `styles/globals.css` for the complete color system and theme variables.
 
-<span>**│   │   └── supabase/**</span>
+### Typography Scale
 
-<span>**│   └── hooks/**</span>
+- Headers: "text-2xl font-semibold"
+- Subheaders: "text-lg font-medium"
+- Body: "text-sm"
+- Muted: "text-sm text-muted-foreground"
 
-## **<span>2. Development Principles</span>**
+### Common Component Patterns
 
-### **<span>Code Organization</span>**
+<span>typescript</span>
 
-- <span>Use functional, declarative programming</span>
-- <span>Strong TypeScript typing throughout</span>
-- <span>File structure: exports, subcomponents, helpers, types, static content</span>
-- <span>Early return pattern and guard clauses</span>
-- <span>Descriptive variable names (isLoading, hasError)</span>
-- <span>Lowercase with dashes for directories</span>
+<span>// Interactive Cards</span>
 
-### **<span>Component Architecture</span>**
+<span>className={cn(</span>
 
-<span>***// Template for new components***</span>
+<span>"bg-card text-card-foreground",</span>
 
-<span>**import { type ComponentProps } from 'react'**</span>
+<span>"hover:bg-accent transition-colors",</span>
 
-<span>**import { cn } from '@/lib/utils'**</span>
+<span>"border border-border",</span>
 
-<span>**interface ExampleProps extends ComponentProps&lt;'div'&gt; {**</span>
+<span>"rounded-lg shadow-sm"</span>
 
-  <span>**title: string**</span>
+<span>)}</span>
 
-  <span>***// Add specific props***</span>
+<span>// Form Inputs</span>
 
-<span>**}**</span>
+<span>className={cn(</span>
 
-<span>**export function Example({ *title*, *className*, ...*props* }: ExampleProps) {**</span>
+<span>"border-input bg-background",</span>
 
-  <span>***// Early returns for error conditions***</span>
+<span>"focus-visible:ring-2 focus-visible:ring-ring",</span>
 
-  <span>**if (!title) return null**</span>
+<span>"disabled:bg-muted"</span>
 
-  <span>**return (**</span>
+<span>)}</span>
 
-    <span>**&lt;div className={cn('base-styles', *className*)} {...*props*}&gt;**</span>
+<span>// Buttons</span>
 
-      <span>**{*/\* Component content \*/*}**</span>
+<span>className={cn(</span>
 
-    <span>**&lt;/div&gt;**</span>
+<span>// Primary</span>
 
-  <span>**)**</span>
+<span>"bg-primary text-primary-foreground hover:bg-primary/90",</span>
 
-<span>**}**</span>
+<span>// Secondary</span>
 
-## **<span>3. Authentication Implementation</span>**
+<span>"bg-secondary text-secondary-foreground hover:bg-secondary/80",</span>
 
-### **<span>Magic Link Flow</span>**
+<span>// Destructive</span>
 
-<span>***// src/lib/actions/auth.ts***</span>
+<span>"bg-destructive text-destructive-foreground hover:bg-destructive/90"</span>
 
-<span>**export async function signInWithMagicLink(*email*: string) {**</span>
+<span>)}</span>
 
-  <span>**const supabase = await createClient()**</span>
+<span>// Status Indicators</span>
 
-  <span>**const callbackUrl =**</span> `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`
+<span>className={cn(</span>
 
-  <span>**return supabase.auth.signInWithOtp({**</span>
+<span>"bg-destructive-10", // Error backgrounds</span>
 
-    <span>**email,**</span>
+<span>"text-success", // Success text</span>
 
-    <span>**options: {**</span>
+<span>"text-muted-foreground" // Subdued text</span>
 
-      <span>**emailRedirectTo: encodeURIComponent(callbackUrl)**</span>
+<span>)}</span>
 
-    <span>**}**</span>
+## Development Principles
 
-  <span>**})**</span>
+- Functional, declarative programming
+- Strong TypeScript typing
+- Early returns and guard clauses
+- Consistent error handling
+- Performance optimization with useMemo
+- Component composition over inheritance
 
-<span>**}**</span>
+## Error Handling
 
-<span>***// src/app/auth/callback/route.ts***</span>
+<span>typescript</span>
 
-<span>**export async function GET(*request*: Request) {**</span>
+<span>try {</span>
 
-  <span>**const requestUrl = new URL(request.url)**</span>
+<span>if (!isValid) throw new ValidationError('Invalid input');</span>
 
-  <span>**const code = requestUrl.searchParams.get('code')**</span>
+<span>const result = await performOperation();</span>
 
-  <span>**const supabase = await createClient()**</span>
+<span>await auditLog.success('operation_completed');</span>
 
-  
+<span>return result;</span>
 
-  <span>**if (code) {**</span>
+<span>} catch (error) {</span>
 
-    <span>**await supabase.auth.exchangeCodeForSession(code)**</span>
+<span>await auditLog.error('operation_failed', error);</span>
 
-  <span>**}**</span>
+<span>return { error: mapError(error) };</span>
 
-  
+<span>}</span>
 
-  <span>**return NextResponse.redirect(new URL('/dashboard', request.url))**</span>
+## Testing Requirements
 
-<span>**}**</span>
+- Unit tests: Critical functions
+- Integration: Data flows
+- E2E: User journeys
+- Security: Auth flows
+- Performance: Load testing
 
-## **<span>4. Supabase/Basejump Integration</span>**
+## Documentation
 
-### **<span>Client Setup</span>**
-
-<span>***// src/lib/supabase/server.ts***</span>
-
-<span>**export async function createClient() {**</span>
-
-  <span>**const cookieStore = cookies()**</span>
-
-  <span>**return createServerClient(**</span>
-
-    [<span>**process.env.NEXT**</span>](http://process.env.NEXT)<span>**\_PUBLIC_SUPABASE_URL!,**</span>
-
-    [<span>**process.env.NEXT**</span>](http://process.env.NEXT)<span>**\_PUBLIC_SUPABASE_ANON_KEY!,**</span>
-
-    <span>**{**</span>
-
-      <span>**cookies: {**</span>
-
-        <span>**get(*name*) { return cookieStore.get(name)?.value },**</span>
-
-        <span>**set(*name*, *value*, *options*) {**</span>
-
-          <span>**cookieStore.set({ name, value, ...options })**</span>
-
-        <span>**},**</span>
-
-        <span>**remove(*name*, *options*) {**</span>
-
-          <span>**cookieStore.set({ name, value: "", ...options })**</span>
-
-        <span>**}**</span>
-
-      <span>**}**</span>
-
-    <span>**}**</span>
-
-  <span>**)**</span>
-
-<span>**}**</span>
-
-### **<span>RPC Patterns</span>**
-
-<span>***// src/lib/accounts/get-personal-account.ts***</span>
-
-<span>**export async function getPersonalAccount() {**</span>
-
-  <span>**const supabase = await createClient()**</span>
-
-  <span>**return supabase.rpc('get_personal_account')**</span>
-
-<span>**}**</span>
-
-## **<span>5. Security & Compliance</span>**
-
-- <span>Implement PHI encryption helpers</span>
-- <span>Validate all RLS policies</span>
-- <span>Set up audit logging system</span>
-- <span>Configure session management & timeouts</span>
-- <span>Implement protected fields</span>
-- <span>Set up location data protection</span>
-- <span>Configure CSV import security</span>
-- <span>Follow HIPAA compliance strategy</span>
-
-## **<span>6. Component Implementation</span>**
-
-### **<span>Dashboard Components</span>**
-
-<span>***// src/components/dashboard/stats-card.tsx***</span>
-
-<span>**interface StatsCardProps {**</span>
-
-  <span>**title: string**</span>
-
-  <span>**value: number | string**</span>
-
-  <span>**change?: {**</span>
-
-    <span>**value: number**</span>
-
-    <span>**label: string**</span>
-
-  <span>**}**</span>
-
-  <span>**icon?: React.ReactNode**</span>
-
-  <span>**titleColor?: string**</span>
-
-  <span>**valueClassName?: string**</span>
-
-<span>**}**</span>
-
-<span>**export function StatsCard({**</span> 
-
-  <span>***title*,**</span> 
-
-  <span>***value*,**</span> 
-
-  <span>***change*,**</span> 
-
-  <span>***icon*,**</span>
-
-  <span>***titleColor* = "text-\[#46296B\]",**</span>
-
-  <span>***valueClassName***</span> 
-
-<span>**}: StatsCardProps) {**</span>
-
-  <span>**return (**</span>
-
-    <span>**&lt;div className="flex-1 px-8 first:pl-0 last:pr-0"&gt;**</span>
-
-      <span>**{*/\* Component content \*/*}**</span>
-
-    <span>**&lt;/div&gt;**</span>
-
-  <span>**)**</span>
-
-<span>**}**</span>
-
-## **<span>7. Styling Guidelines</span>**
-
-### **<span>Color System</span>**
-
-<span>**:root {**</span>
-
-  <span>**--primary: rgb(70, 41, 107);**</span>
-
-  <span>**--primary-hover: rgb(70, 41, 107, 0.9);**</span>
-
-  <span>**--accent-blue: #94CCEE;**</span>
-
-  <span>**--background: #ffffff;**</span>
-
-  <span>**--foreground: #000000;**</span>
-
-  <span>**--muted: #f1f5f9;**</span>
-
-  <span>**--muted-foreground: #64748b;**</span>
-
-<span>**}**</span>
-
-### **<span>Common Patterns</span>**
-
-<span>***// Gradient backgrounds***</span>
-
-<span>**className="bg-gradient-to-br from-white to-slate-100"**</span>
-
-<span>***// Focus states***</span>
-
-<span>**className="focus-visible:ring-2 focus-visible:ring-accent-blue"**</span>
-
-<span>***// Typography***</span>
-
-<span>**className="text-lg font-semibold text-\[#46296B\]"**</span>
-
-## **<span>8. Error Handling & Validation</span>**
-
-<span>***// Example error handling pattern***</span>
-
-<span>**async function handleOperation() {**</span>
-
-  <span>**try {**</span>
-
-    <span>***// Validate inputs first***</span>
-
-    <span>**if (!isValid) {**</span>
-
-      <span>**throw new ValidationError('Invalid input')**</span>
-
-    <span>**}**</span>
-
-    <span>***// Perform operation***</span>
-
-    <span>**const result = await performOperation()**</span>
-
-    <span>***// Log success***</span>
-
-    <span>**await auditLog.success('operation_completed')**</span>
-
-    <span>**return result**</span>
-
-  <span>**} catch (error) {**</span>
-
-    <span>***// Log error***</span>
-
-    <span>**await auditLog.error('operation_failed', error)**</span>
-
-    
-
-    <span>***// Return typed error***</span>
-
-    <span>**return { error: mapError(error) }**</span>
-
-  <span>**}**</span>
-
-<span>**}**</span>
-
-## **<span>9. Testing Strategy</span>**
-
-- <span>Unit tests for critical functions</span>
-- <span>Integration tests for data flows</span>
-- <span>E2E tests for PHI handling</span>
-- <span>Security testing</span>
-- <span>Performance monitoring</span>
-- <span>Error tracking</span>
-
-## **<span>10. Performance Optimization</span>**
-
-<span>***// Example of optimized component***</span>
-
-<span>**export function OptimizedList({ *items* }: { items: Item\[\] }) {**</span>
-
-  <span>***// Memoize expensive calculations***</span>
-
-  <span>**const processedItems = useMemo(() =&gt;**</span> 
-
-    [<span>**items.map**</span>](http://items.map)<span>**(processItem),**</span> 
-
-    <span>**\[items\]**</span>
-
-  <span>**)**</span>
-
-  <span>***// Use virtualization for long lists***</span>
-
-  <span>**return (**</span>
-
-    <span>**&lt;*VirtualList***</span>
-
-      <span>**items={processedItems}**</span>
-
-      <span>**height={400}**</span>
-
-      <span>**itemHeight={40}**</span>
-
-      <span>**renderItem={(item) =&gt; (**</span>
-
-        <span>**&lt;ListItem key={**</span>[<span>**item.id**</span>](http://item.id)<span>**} item={item} /&gt;**</span>
-
-      <span>**)}**</span>
-
-    <span>**/&gt;**</span>
-
-  <span>**)**</span>
-
-<span>**}**</span>
-
-## **<span>11. Documentation</span>**
-
-- <span>Maintain JSDoc comments</span>
-- <span>Document RLS policies</span>
-- <span>Keep security measures documented</span>
-- <span>Update build plan regularly</span>
-- <span>Document API endpoints</span>
+- JSDoc for public functions
+- RLS policy documentation
+- API endpoint specs
+- Security measure logs
+- Build process docs

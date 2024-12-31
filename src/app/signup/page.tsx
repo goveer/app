@@ -1,40 +1,67 @@
 import Image from "next/image";
-import Link from "next/link";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
-import { LoginForm } from "@/components/auth/login-form";
+import { SignUpForm } from "@/components/auth/signup-form";
+import { LoopsClient } from "@/lib/loops/server";
 
-export default function Login({
+export default function SignUp({
   searchParams,
 }: {
   searchParams: { message: string; returnUrl?: string };
 }) {
-  const signIn = async (formData: FormData) => {
+  const signUp = async (formData: FormData) => {
     "use server";
-
+    
     const origin = headers().get("origin");
     const email = formData.get("email") as string;
     const supabase = createClient();
+    const loops = new LoopsClient(process.env.LOOPS_API_KEY as string);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback?returnUrl=${searchParams.returnUrl}`,
-      },
-    });
+    try {
+      // 1. Sign up with Supabase
+      const { error: supabaseError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?returnUrl=/onboarding`,
+        },
+      });
 
-    if (error) {
-      return redirect(`/login?message=Could not send magic link&returnUrl=${searchParams.returnUrl}`);
+      if (supabaseError) {
+        return redirect(`/signup?message=Could not send magic link`);
+      }
+
+      // 2. Create contact in Loops (Option 1 - create now)
+      const { success: loopsSuccess } = await loops.createContact(email, {
+        source: "signup_form",
+        subscribed: true,
+      });
+
+      if (!loopsSuccess) {
+        console.error("Failed to create Loops contact");
+        // Continue anyway since user is created in Supabase
+      }
+
+      // 3. Send welcome email via Loops
+      await loops.sendTransactionalEmail({
+        transactionalId: "your_welcome_email_id",
+        email,
+        dataVariables: {
+          confirmationUrl: `${origin}/auth/callback?returnUrl=/onboarding`,
+        },
+      });
+
+      return redirect(`/login?message=Check email to continue sign in process`);
+    } catch (error) {
+      console.error("Signup error:", error);
+      return redirect(`/signup?message=An error occurred during signup`);
     }
-
-    return redirect(`/login?message=Check email to continue sign in process&returnUrl=${searchParams.returnUrl}`);
   };
 
-  const signInWithGoogle = async () => {
+  const signUpWithGoogle = async () => {
     "use server";
     
     const origin = headers().get("origin");
@@ -48,7 +75,7 @@ export default function Login({
     });
 
     if (error) {
-      return redirect(`/login?message=Could not authenticate with Google&returnUrl=${searchParams.returnUrl}`);
+      return redirect(`/signup?message=Could not authenticate with Google&returnUrl=${searchParams.returnUrl}`);
     }
 
     return redirect(data?.url || '/dashboard');
@@ -89,17 +116,13 @@ export default function Login({
             <div className="flex items-center justify-center">
               <Card className="w-full max-w-[420px]">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-[32px] text-[#46296B] mb-2">Sign in</CardTitle>
-                  <p className="text-base text-muted-foreground">
-                    Don't have an account?{' '}
-                    <Link href="/signup" className="text-sky-500 hover:text-sky-700 font-semibold">
-                      Sign up
-                    </Link>
-                  </p>
+                  <CardTitle className="text-[24px] text-[#46296B] text-center leading-[1.2]">
+                    Optimize your first Veer<br />schedule in seconds
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <GoogleButton 
-                    onClick={signInWithGoogle}
+                    onClick={signUpWithGoogle}
                   />
                   
                   <div className="relative py-6">
@@ -113,8 +136,8 @@ export default function Login({
                     </div>
                   </div>
 
-                  <LoginForm 
-                    signInAction={signIn}
+                  <SignUpForm 
+                    signUpAction={signUp}
                     message={searchParams?.message}
                   />
                 </CardContent>
@@ -125,4 +148,4 @@ export default function Login({
       </div>
     </div>
   );
-}
+} 
