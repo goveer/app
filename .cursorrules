@@ -2,188 +2,99 @@
 
 ## Project Structure
 
-project/\
-├── src/\
-│   ├── app/                    # App router pages\
-│   │   ├── dashboard/          # Dashboard routes\
-│   │   ├── auth/              # Auth routes\
-│   │   ├── login/\
-│   │   └── signup/\
-│   ├── components/\
-│   │   ├── ui/               # Base components\
-│   │   ├── dashboard/        # Dashboard features\
-│   │   ├── auth/            # Auth forms\
-│   │   └── layout/          # Layout components\
-│   ├── lib/                 # Core utilities\
-│   └── hooks/               # Custom hooks
+project/
+├── src/
+│   ├── app/                    # App router pages
+│   │   ├── dashboard/          # Dashboard routes
+│   │   ├── auth/              # Auth routes
+│   │   │   ├── callback/      # OAuth callback
+│   │   │   └── confirm/       # Email confirmation
+│   │   ├── login/            # Login page
+│   │   └── signup/           # Signup page
+│   ├── components/
+│   │   ├── ui/               # Base components
+│   │   ├── dashboard/        # Dashboard features
+│   │   ├── auth/            # Auth forms
+│   │   └── layout/          # Layout components
+│   └── lib/
+│       ├── supabase/        # Supabase clients
+│       │   ├── client.ts    # Browser client
+│       │   ├── server.ts    # Server client
+│       │   └── middleware.ts # Auth middleware
+│       └── utils/           # Helper functions
+
+## Package Management
+
+- Use Yarn for all package management
+- Commands:
+  ```bash
+  yarn install      # Install dependencies
+  yarn dev         # Start development server
+  yarn build       # Build for production
+  yarn start       # Start production server
+  yarn lint        # Run linting
+  yarn test        # Run tests
+  ```
+
+## Auth Implementation
+
+- Server-side auth using Supabase SSR package
+- Protected routes with middleware
+- Email verification flow
+- Magic link authentication
+- Server actions for auth operations
 
 ## Security Best Practices
 
-- Use `supabase.auth.getUser()` instead of `getSession()`
+- Use `getUser()` instead of `getSession()` for server-side auth
 - Implement RLS policies for all tables
-- Audit logging for sensitive operations
-- PHI encryption for medical data
-- Session timeouts and management
+- Protected routes in middleware
+- Server-side validation
+- Secure cookie handling
 
 ## Component Patterns
 
 ### Base Component Template
+```typescript
+interface ComponentProps extends React.ComponentProps<'div'> {
+  title: string;
+}
 
-<span>typescript</span>
-
-<span>interface ComponentProps extends React.ComponentProps&lt;'div'&gt; {</span>
-
-<span>title: string;</span>
-
-<span>}</span>
-
-<span>export function Component({ title, className, ...props }: ComponentProps) {</span>
-
-<span>if (!title) return null;</span>
-
-<span>return (</span>
-
-<span>&lt;div className={cn('base-styles', className)} {...props}&gt;</span>
-
-<span>{/</span> <span>*<span>Content</span>*</span> <span>/}</span>
-
-<span>&lt;/div&gt;</span>
-
-<span>);</span>
-
-<span>}</span>
+export function Component({ title, className, ...props }: ComponentProps) {
+  return (
+    <div className={cn('base-styles', className)} {...props}>
+      {/* Content */}
+    </div>
+  );
+}
+```
 
 ### Form Patterns
-
 - Server actions for submissions
 - Client-side validation
 - Loading states
-- Error handling with toast feedback
-- Multi-step form with progress tracking
-
-### Button Effects
-
-- expandIcon: Icon reveal on hover
-- gooeyLeft: Gradient slide effect
-- shineHover: Shine animation
-- ringHover: Border animation
+- Error handling
+- Multi-step forms
 
 ## Styling System
 
 ### Colors & Theme
-
-Reference `styles/globals.css` for the complete color system and theme variables.
+- Primary: #46296B
+- Secondary: #F43F5E
+- Background: #FFFFFF
+- Text: #1F2937
 
 ### Typography Scale
-
 - Headers: "text-2xl font-semibold"
 - Subheaders: "text-lg font-medium"
 - Body: "text-sm"
 - Muted: "text-sm text-muted-foreground"
 
-### Common Component Patterns
-
-<span>typescript</span>
-
-<span>// Interactive Cards</span>
-
-<span>className={cn(</span>
-
-<span>"bg-card text-card-foreground",</span>
-
-<span>"hover:bg-accent transition-colors",</span>
-
-<span>"border border-border",</span>
-
-<span>"rounded-lg shadow-sm"</span>
-
-<span>)}</span>
-
-<span>// Form Inputs</span>
-
-<span>className={cn(</span>
-
-<span>"border-input bg-background",</span>
-
-<span>"focus-visible:ring-2 focus-visible:ring-ring",</span>
-
-<span>"disabled:bg-muted"</span>
-
-<span>)}</span>
-
-<span>// Buttons</span>
-
-<span>className={cn(</span>
-
-<span>// Primary</span>
-
-<span>"bg-primary text-primary-foreground hover:bg-primary/90",</span>
-
-<span>// Secondary</span>
-
-<span>"bg-secondary text-secondary-foreground hover:bg-secondary/80",</span>
-
-<span>// Destructive</span>
-
-<span>"bg-destructive text-destructive-foreground hover:bg-destructive/90"</span>
-
-<span>)}</span>
-
-<span>// Status Indicators</span>
-
-<span>className={cn(</span>
-
-<span>"bg-destructive-10", // Error backgrounds</span>
-
-<span>"text-success", // Success text</span>
-
-<span>"text-muted-foreground" // Subdued text</span>
-
-<span>)}</span>
-
 ## Development Principles
 
-- Functional, declarative programming
+- Server Components by default
+- Client Components when needed
+- Server Actions for forms
 - Strong TypeScript typing
-- Early returns and guard clauses
-- Consistent error handling
-- Performance optimization with useMemo
-- Component composition over inheritance
-
-## Error Handling
-
-<span>typescript</span>
-
-<span>try {</span>
-
-<span>if (!isValid) throw new ValidationError('Invalid input');</span>
-
-<span>const result = await performOperation();</span>
-
-<span>await auditLog.success('operation_completed');</span>
-
-<span>return result;</span>
-
-<span>} catch (error) {</span>
-
-<span>await auditLog.error('operation_failed', error);</span>
-
-<span>return { error: mapError(error) };</span>
-
-<span>}</span>
-
-## Testing Requirements
-
-- Unit tests: Critical functions
-- Integration: Data flows
-- E2E: User journeys
-- Security: Auth flows
-- Performance: Load testing
-
-## Documentation
-
-- JSDoc for public functions
-- RLS policy documentation
-- API endpoint specs
-- Security measure logs
-- Build process docs
+- Component composition
+- Performance optimization

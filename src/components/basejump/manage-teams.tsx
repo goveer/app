@@ -1,43 +1,55 @@
+'use client'
+
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { createClient } from "@/lib/supabase/server";
-import { Table, TableRow, TableBody, TableCell } from "../ui/table";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { Badge } from "../ui/badge";
+import { useState, useEffect } from "react";
 
+export default function ManageTeams() {
+    const [teams, setTeams] = useState<any[]>([]);
 
+    useEffect(() => {
+        async function fetchTeams() {
+            const supabaseClient = await createClient();
 
-export default async function ManageTeams() {
-    const supabaseClient = createClient();
+            const { data } = await supabaseClient.rpc('get_accounts');
 
-    const { data } = await supabaseClient.rpc('get_accounts');
+            if (data) {
+                const teamsList = data.filter((team: any) => team.personal_account === false);
+                setTeams(teamsList);
+            }
+        }
 
-    const teams: any[] = data?.filter((team: any) => team.personal_account === false);
+        fetchTeams();
+    }, []);
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Teams</CardTitle>
-                <CardDescription>
-                    These are the teams you belong to
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableBody>
-                        {teams.map((team) => (
-                            <TableRow key={team.account_id}>
-                                <TableCell>
-                                    <div className="flex gap-x-2">
-                                    {team.name}
-                                    <Badge variant={team.account_role === 'owner' ? 'default' : 'outline'}>{team.is_primary_owner ? 'Primary Owner' : team.account_role}</Badge></div>
-                                </TableCell>
-                                <TableCell className="text-right"><Button variant="outline" asChild><Link href={`/dashboard/${team.slug}`}>View</Link></Button></TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
-    )
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Teams</h2>
+                <Button asChild>
+                    <Link href="/teams/new">Create Team</Link>
+                </Button>
+            </div>
+
+            <div className="grid gap-4">
+                {teams.map((team) => (
+                    <Card key={team.id}>
+                        <CardHeader>
+                            <CardTitle>{team.name}</CardTitle>
+                            <CardDescription>{team.slug}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button asChild variant="outline">
+                                <Link href={`/dashboard/${team.slug}`}>
+                                    View Dashboard
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    );
 }

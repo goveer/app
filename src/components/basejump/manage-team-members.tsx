@@ -1,51 +1,76 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { createClient } from "@/lib/supabase/server";
-import { Table, TableRow, TableBody, TableCell } from "../ui/table";
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
-import { Badge } from "../ui/badge";
-import TeamMemberOptions from "./team-member-options";
-
-type Props = {
-    accountId: string;
+interface Props {
+  teamId: string
 }
 
-export default async function ManageTeamMembers({accountId}: Props) {
-    const supabaseClient = createClient();
+export default async function ManageTeamMembers({ teamId }: Props) {
+  const supabase = await createClient()
 
-    const { data: members } = await supabaseClient.rpc('get_account_members', {
-        account_id: accountId
-    });
+  // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    const {data} = await supabaseClient.auth.getUser();
-    const isPrimaryOwner = members?.find((member: any) => member.user_id === data?.user?.id)?.is_primary_owner;
+  if (userError || !user) {
+    redirect('/login')
+  }
 
+  // Get team members
+  const { data: members, error: membersError } = await supabase
+    .from('team_members')
+    .select(`
+      *,
+      user:users (
+        email,
+        user_metadata
+      )
+    `)
+    .eq('team_id', teamId)
 
+  if (membersError) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>
-                    These are the users in your team
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableBody>
-                        {members?.map((member: any) => (
-                            <TableRow key={member.user_id}>
-                                <TableCell>
-                                    <div className="flex gap-x-2">
-                                    {member.name}
-                                    <Badge variant={member.account_role === 'owner' ? 'default' : 'outline'}>{member.is_primary_owner ? 'Primary Owner' : member.account_role}</Badge></div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {!Boolean(member.is_primary_owner) && <TeamMemberOptions teamMember={member} accountId={accountId} isPrimaryOwner={isPrimaryOwner} />}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+      <div className="p-4">
+        <p className="text-red-600">Error loading team members</p>
+      </div>
     )
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold">Team Members</h2>
+      
+      <div className="divide-y">
+        {members.map((member) => (
+          <div key={member.id} className="py-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium">{member.user.email}</p>
+              <p className="text-sm text-gray-500 capitalize">{member.role}</p>
+            </div>
+            
+            {member.user_id !== user.id && (
+              <form>
+                <input type="hidden" name="memberId" value={member.id} />
+                <input type="hidden" name="teamId" value={teamId} />
+                <button
+                  type="submit"
+                  formAction={async (formData: FormData) => {
+                    "use server"
+                    const supabase = await createClient()
+                    await supabase
+                      .from('team_members')
+                      .delete()
+                      .eq('id', formData.get('memberId'))
+                    redirect(`/teams/${formData.get('teamId')}/members`)
+                  }}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  Remove
+                </button>
+              </form>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }

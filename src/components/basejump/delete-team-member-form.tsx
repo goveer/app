@@ -1,5 +1,5 @@
 import { SubmitButton } from "../ui/submit-button"
-import { removeTeamMember } from "@/lib/actions/members";
+import { removeMember } from "@/lib/actions/members";
 import { GetAccountMembersResponse } from "@usebasejump/shared";
 import { usePathname } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default function DeleteTeamMemberForm({ accountId, teamMember }: Props) {
             <input type="hidden" name="userId" value={teamMember.user_id} />
             <input type="hidden" name="returnUrl" value={pathName} />
 
-            <SubmitButton variant="destructive" formAction={removeTeamMember} pendingText="Removing...">
+            <SubmitButton variant="destructive" formAction={removeMember} pendingText="Removing...">
                 Remove member
             </SubmitButton>
         </form>

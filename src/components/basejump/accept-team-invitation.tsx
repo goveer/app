@@ -1,36 +1,59 @@
-import { acceptInvitation } from "@/lib/actions/invitations";
-import { createClient } from "@/lib/supabase/server";
-import { Alert } from "../ui/alert";
-import { Card, CardContent } from "../ui/card";
-import { SubmitButton } from "../ui/submit-button";
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
-type Props = {
-    token: string;
+interface Props {
+  token: string
 }
-export default async function AcceptTeamInvitation({ token }: Props) {
-    const supabaseClient = createClient();
-    const { data: invitation } = await supabaseClient.rpc('lookup_invitation', {
-        lookup_invitation_token: token
-    });
 
+export default async function AcceptTeamInvitation({ token }: Props) {
+  const supabase = await createClient()
+
+  // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    redirect('/login')
+  }
+
+  // Get invitation details
+  const { data: invitation, error: inviteError } = await supabase
+    .from('team_invitations')
+    .select('*')
+    .eq('token', token)
+    .single()
+
+  if (inviteError || !invitation) {
     return (
-        <Card>
-            <CardContent className="p-8 text-center flex flex-col gap-y-8">
-                <div>
-                    <p>You've been invited to join</p>
-                    <h1 className="text-xl font-bold">{invitation.account_name}</h1>
-                </div>
-                {Boolean(invitation.active) ? (
-                    <form>
-                        <input type="hidden" name="token" value={token} />
-                        <SubmitButton formAction={acceptInvitation} pendingText="Accepting invitation...">Accept invitation</SubmitButton>
-                    </form>
-                ) : (
-                    <Alert variant="destructive">
-                        This invitation has been deactivated. Please contact the account owner for a new invitation.
-                    </Alert>
-                )}
-            </CardContent>
-        </Card>
+      <div className="p-4 text-center">
+        <h1 className="text-xl font-semibold text-red-600">Invalid or expired invitation</h1>
+        <p className="mt-2 text-gray-600">This invitation may have expired or been revoked.</p>
+      </div>
     )
+  }
+
+  // Accept invitation
+  const { error: acceptError } = await supabase
+    .from('team_members')
+    .insert({
+      team_id: invitation.team_id,
+      user_id: user.id,
+      role: invitation.role,
+    })
+
+  if (acceptError) {
+    return (
+      <div className="p-4 text-center">
+        <h1 className="text-xl font-semibold text-red-600">Could not accept invitation</h1>
+        <p className="mt-2 text-gray-600">An error occurred while accepting the invitation.</p>
+      </div>
+    )
+  }
+
+  // Delete the invitation
+  await supabase
+    .from('team_invitations')
+    .delete()
+    .eq('id', invitation.id)
+
+  redirect(`/dashboard/${invitation.team_id}`)
 }

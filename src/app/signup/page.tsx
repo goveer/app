@@ -1,85 +1,52 @@
+"use client";
+
 import Image from "next/image";
-import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { SignUpForm } from "@/components/auth/signup-form";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
-import { SignUpForm } from "@/components/auth/signup-form";
-import { LoopsClient } from "@/lib/loops/server";
 
 export default function SignUp({
   searchParams,
 }: {
   searchParams: { message: string; returnUrl?: string };
 }) {
-  const signUp = async (formData: FormData) => {
-    "use server";
-    
-    const origin = headers().get("origin");
-    const email = formData.get("email") as string;
+  async function signUpWithGoogle() {
     const supabase = createClient();
-    const loops = new LoopsClient(process.env.LOOPS_API_KEY as string);
-
-    try {
-      // 1. Sign up with Supabase
-      const { error: supabaseError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${origin}/auth/callback?returnUrl=/onboarding`,
-        },
-      });
-
-      if (supabaseError) {
-        return redirect(`/signup?message=Could not send magic link`);
-      }
-
-      // 2. Create contact in Loops (Option 1 - create now)
-      const { success: loopsSuccess } = await loops.createContact(email, {
-        source: "signup_form",
-        subscribed: true,
-      });
-
-      if (!loopsSuccess) {
-        console.error("Failed to create Loops contact");
-        // Continue anyway since user is created in Supabase
-      }
-
-      // 3. Send welcome email via Loops
-      await loops.sendTransactionalEmail({
-        transactionalId: "your_welcome_email_id",
-        email,
-        dataVariables: {
-          confirmationUrl: `${origin}/auth/callback?returnUrl=/onboarding`,
-        },
-      });
-
-      return redirect(`/login?message=Check email to continue sign in process`);
-    } catch (error) {
-      console.error("Signup error:", error);
-      return redirect(`/signup?message=An error occurred during signup`);
-    }
-  };
-
-  const signUpWithGoogle = async () => {
-    "use server";
-    
-    const origin = headers().get("origin");
-    const supabase = createClient();
-    
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${origin}/auth/callback?returnUrl=${searchParams.returnUrl}`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
     if (error) {
-      return redirect(`/signup?message=Could not authenticate with Google&returnUrl=${searchParams.returnUrl}`);
+      console.error('Error signing in with Google:', error);
+    }
+  }
+
+  async function signUp(formData: FormData) {
+    const email = formData.get("email") as string;
+    const supabase = createClient();
+    
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
+      },
+    });
+
+    if (error) {
+      return { error: error.message };
     }
 
-    return redirect(data?.url || '/dashboard');
-  };
+    return { 
+      success: true,
+      message: "Check your email for the magic link to complete your signup." 
+    };
+  }
 
   return (
     <div 

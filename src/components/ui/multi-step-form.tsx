@@ -19,6 +19,7 @@ export interface FormStep {
     property: string;
     value: string;
     icon?: React.ComponentType<{ className?: string }>;
+    workType?: string;
   }[];
 }
 
@@ -211,12 +212,55 @@ const steps: FormStep[] = [
         icon: LineChart
       }
     ]
+  },
+  {
+    id: 'payment',
+    title: 'Choose your subscription plan',
+    description: 'Start with a 14-day free trial. No credit card required.',
+    items: [
+      {
+        id: 'annual-team',
+        title: 'Teams (Annual)',
+        description: '14-day free trial, then $99/month, billed annually',
+        property: 'plan',
+        value: 'team_annual',
+        icon: ChevronRight,
+        workType: 'team'
+      },
+      {
+        id: 'monthly-team',
+        title: 'Teams (Monthly)',
+        description: '14-day free trial, then $129/month',
+        property: 'plan',
+        value: 'team_monthly',
+        icon: ChevronRight,
+        workType: 'team'
+      },
+      {
+        id: 'annual-individual',
+        title: 'Single (Annual)',
+        description: '14-day free trial, then $29/month, billed annually',
+        property: 'plan',
+        value: 'individual_annual',
+        icon: ChevronRight,
+        workType: 'individual'
+      },
+      {
+        id: 'monthly-individual',
+        title: 'Single (Monthly)',
+        description: '14-day free trial, then $39/month',
+        property: 'plan',
+        value: 'individual_monthly',
+        icon: ChevronRight,
+        workType: 'individual'
+      }
+    ]
   }
 ];
 
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
   return (
-    <div className="grid grid-cols-4 gap-4 w-full mb-8">
+    <div className="grid grid-cols-5 gap-4 w-full mb-8">
       {Array.from({ length: totalSteps }).map((_, index) => (
         <div
           key={index}
@@ -250,13 +294,21 @@ export function MultiStepForm({
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // Convert Record to FormData
-      const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
-      });
-      await completeAction(form);
-      router.push('/dashboard?onboarding=complete');
+      // If it's the payment step, redirect to checkout with plan
+      if (item.property === 'plan') {
+        router.push(`/onboarding/checkout?plan=${item.value}`);
+        return;
+      }
+      
+      // Otherwise proceed with the normal completion
+      if (completeAction) {
+        const formDataObj = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          formDataObj.append(key, value);
+        });
+        formDataObj.append(item.property, item.value);
+        await completeAction(formDataObj);
+      }
     }
   };
 
@@ -281,71 +333,95 @@ export function MultiStepForm({
           </h2>
           <div className={cn(
             currentStep === 3 ? "grid grid-cols-1 gap-4" : 
+            currentStep === steps.length - 1 ? "grid grid-cols-1 gap-4" :
             currentStep > 0 ? "grid grid-cols-3 gap-4" : 
             "flex flex-col gap-[16px]"
           )}>
-            {steps[currentStep].items.map((item) => (
-              <Card 
-                key={item.id}
-                className={cn(
-                  "p-4 cursor-pointer transition-all h-[100px]",
-                  currentStep === 0 ? "hover:translate-x-4 hover:shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.10),0px_2px_4px_-2px_rgba(0,0,0,0.10)]" : "",
-                  formData[item.property] === item.value ? "bg-[#F5F3FF]" : "",
-                  currentStep === 3 ? "hover:bg-[#F5F3FF] group" : currentStep > 0 ? "hover:bg-[#F5F3FF] group min-h-[80px] flex items-center justify-center" : ""
-                )}
-                onClick={() => handleSelection(item)}
-              >
-                {currentStep === 0 ? (
-                  <div className="flex items-center justify-between h-full">
-                    <div>
+            {steps[currentStep].items
+              .filter(item => {
+                // Only show plans matching the selected workType
+                if (currentStep === steps.length - 1) {
+                  return item.workType === formData.workType;
+                }
+                return true;
+              })
+              .map((item) => (
+                <Card 
+                  key={item.id}
+                  className={cn(
+                    "p-4 cursor-pointer transition-all",
+                    currentStep === 0 ? "hover:translate-x-4 h-[100px] hover:shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.10),0px_2px_4px_-2px_rgba(0,0,0,0.10)]" : "",
+                    currentStep === steps.length - 1 ? "hover:bg-[#F5F3FF] group p-6" : "",
+                    formData[item.property] === item.value ? "bg-[#F5F3FF]" : "",
+                    currentStep === 3 ? "hover:bg-[#F5F3FF] group" : 
+                    currentStep > 0 && currentStep < steps.length - 1 ? "hover:bg-[#F5F3FF] group min-h-[80px] flex items-center justify-center" : ""
+                  )}
+                  onClick={() => handleSelection(item)}
+                >
+                  {currentStep === steps.length - 1 ? (
+                    <div className="flex flex-col gap-2">
                       <h3 className={cn(
-                        "text-lg font-medium mb-1",
-                        formData[item.property] === item.value ? "text-[#46296B]" : ""
+                        "text-xl font-semibold",
+                        formData[item.property] === item.value ? "text-[#46296B]" : "",
+                        "group-hover:text-[#46296B]"
                       )}>{item.title}</h3>
                       <p className={cn(
-                        "text-sm",
-                        formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground"
+                        "text-base",
+                        formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
+                        "group-hover:text-[#46296B]"
                       )}>{item.description}</p>
                     </div>
-                    <ChevronRight className={cn(
-                      "h-7 w-7 transition-colors",
-                      formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
-                      "group-hover:text-[#46296B]"
-                    )} />
-                  </div>
-                ) : currentStep === 3 ? (
-                  <div className="flex items-start gap-4">
-                    {item.icon && (
-                      <item.icon className={cn(
-                        "h-6 w-6 mt-1",
+                  ) : currentStep === 0 ? (
+                    <div className="flex items-center justify-between h-full">
+                      <div>
+                        <h3 className={cn(
+                          "text-lg font-medium mb-1",
+                          formData[item.property] === item.value ? "text-[#46296B]" : ""
+                        )}>{item.title}</h3>
+                        <p className={cn(
+                          "text-sm",
+                          formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground"
+                        )}>{item.description}</p>
+                      </div>
+                      <ChevronRight className={cn(
+                        "h-7 w-7 transition-colors",
                         formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
-                        "group-hover:text-muted-foreground"
+                        "group-hover:text-[#46296B]"
                       )} />
-                    )}
-                    <div className="flex flex-col items-start text-left">
+                    </div>
+                  ) : currentStep === 3 ? (
+                    <div className="flex items-start gap-4">
+                      {item.icon && (
+                        <item.icon className={cn(
+                          "h-6 w-6 mt-1",
+                          formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
+                          "group-hover:text-muted-foreground"
+                        )} />
+                      )}
+                      <div className="flex flex-col items-start text-left">
+                        <h3 className={cn(
+                          "text-lg font-medium",
+                          formData[item.property] === item.value ? "text-[#46296B]" : "",
+                          "group-hover:text-muted-foreground"
+                        )}>{item.title}</h3>
+                        <p className={cn(
+                          "text-sm",
+                          formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
+                          "group-hover:text-muted-foreground"
+                        )}>{item.description}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center w-full">
                       <h3 className={cn(
                         "text-lg font-medium",
                         formData[item.property] === item.value ? "text-[#46296B]" : "",
-                        "group-hover:text-muted-foreground"
+                        "group-hover:text-[#46296B]"
                       )}>{item.title}</h3>
-                      <p className={cn(
-                        "text-sm",
-                        formData[item.property] === item.value ? "text-[#46296B]" : "text-muted-foreground",
-                        "group-hover:text-muted-foreground"
-                      )}>{item.description}</p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center w-full">
-                    <h3 className={cn(
-                      "text-lg font-medium",
-                      formData[item.property] === item.value ? "text-[#46296B]" : "",
-                      "group-hover:text-[#46296B]"
-                    )}>{item.title}</h3>
-                  </div>
-                )}
-              </Card>
-            ))}
+                  )}
+                </Card>
+              ))}
           </div>
           {currentStep > 0 && (
             <div className="mt-16">

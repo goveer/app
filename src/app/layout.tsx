@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Veer',
     description: 'Intelligent scheduling and routing for healthcare professionals',
-    url: 'https://veer.health',
+    url: 'https://goveer.ai',
     siteName: 'Veer',
     type: 'website'
   }

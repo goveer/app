@@ -1,62 +1,96 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
-import { Alert, AlertDescription } from "../ui/alert";
-import { createClient } from "@/lib/supabase/server";
-import { SubmitButton } from "../ui/submit-button";
-import { manageSubscription, setupNewSubscription } from "@/lib/actions/billing";
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
-type Props = {
-    accountId: string;
-    returnUrl: string;
+interface Props {
+  accountId: string
 }
 
-export default async function AccountBillingStatus({ accountId, returnUrl }: Props) {
-    const supabaseClient = createClient();
+export default async function AccountBillingStatus({ accountId }: Props) {
+  const supabase = await createClient()
 
+  // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    const { data, error } = await supabaseClient.functions.invoke('billing-functions', {
-        body: {
-            action: "get_billing_status",
-            args: {
-                account_id: accountId
-            }
-        }
-    });
+  if (userError || !user) {
+    redirect('/login')
+  }
 
+  // Get account's subscription status
+  const { data: account, error: accountError } = await supabase
+    .from('accounts')
+    .select(`
+      *,
+      billing_status:stripe_subscriptions (
+        status,
+        current_period_end,
+        cancel_at_period_end,
+        price:prices (
+          product:products (
+            name
+          ),
+          unit_amount
+        )
+      )
+    `)
+    .eq('id', accountId)
+    .single()
+
+  if (accountError) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Billing Status</CardTitle>
-                <CardDescription>
-                    A quick overview of your billing status
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {!Boolean(data?.billing_enabled) ? (
-                    <Alert variant="destructive">
-                        <AlertDescription>
-                            Billing is not enabled for this account. Check out usebasejump.com for more info or remove this component if you don't plan on enabling billing.
-                        </AlertDescription>
-                    </Alert>
-                ) : (
-                    <div>
-                        <p>Status: {data.status}</p>
-                    </div>
-                )}
-
-            </CardContent>
-            {Boolean(data?.billing_enabled) && (
-                <CardFooter>
-                    <form className="w-full">
-                        <input type="hidden" name="accountId" value={accountId} />
-                        <input type="hidden" name="returnUrl" value={returnUrl} />
-                        {data.status === 'not_setup' ? (
-                            <SubmitButton pendingText="Loading..." formAction={setupNewSubscription}>Setup your Subscription</SubmitButton>
-                        ) : (
-                            <SubmitButton pendingText="Loading..." formAction={manageSubscription}>Manage Subscription</SubmitButton>
-                        )}
-                    </form>
-                </CardFooter>
-            )}
-        </Card>
+      <div className="p-4 rounded-md bg-red-50">
+        <p className="text-red-600">Error loading billing status</p>
+      </div>
     )
+  }
+
+  if (!account.billing_status) {
+    return (
+      <div className="p-4 rounded-md bg-yellow-50">
+        <p className="text-yellow-800">No active subscription</p>
+        <a 
+          href={`/dashboard/${accountId}/billing/upgrade`}
+          className="text-yellow-900 underline hover:no-underline mt-2 inline-block"
+        >
+          Upgrade now
+        </a>
+      </div>
+    )
+  }
+
+  const { status, current_period_end, cancel_at_period_end, price } = account.billing_status
+
+  return (
+    <div className="p-4 rounded-md bg-white shadow">
+      <div className="space-y-2">
+        <h3 className="font-medium">Subscription Status</h3>
+        <p className="text-sm text-gray-500 capitalize">{status}</p>
+        
+        {price && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-500">
+              {price.product.name} - ${(price.unit_amount / 100).toFixed(2)}/month
+            </p>
+          </div>
+        )}
+
+        {current_period_end && (
+          <p className="text-sm text-gray-500">
+            {cancel_at_period_end 
+              ? `Cancels on ${new Date(current_period_end * 1000).toLocaleDateString()}`
+              : `Next billing date: ${new Date(current_period_end * 1000).toLocaleDateString()}`
+            }
+          </p>
+        )}
+
+        <div className="mt-4">
+          <a 
+            href={`/dashboard/${accountId}/billing/manage`}
+            className="text-indigo-600 hover:text-indigo-800 text-sm"
+          >
+            Manage subscription
+          </a>
+        </div>
+      </div>
+    </div>
+  )
 }

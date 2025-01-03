@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { DialogHeader, Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger, DialogPortal, DialogOverlay } from "@/components/ui/dialog";
 import EditTeamMemberRoleForm from "./edit-team-member-role-form";
 import { SubmitButton } from "../ui/submit-button";
-import { removeTeamMember as removeTeamMemberAction } from "@/lib/actions/members";
+import { removeMember as removeMemberAction } from "@/lib/actions/members";
 import DeleteTeamMemberForm from "./delete-team-member-form";
 
 type Props = {

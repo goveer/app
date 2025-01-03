@@ -3,7 +3,7 @@
 import { SubmitButton } from "../ui/submit-button"
 import { Label } from "../ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { updateTeamMemberRole } from "@/lib/actions/members";
+import { updateMemberRole } from "@/lib/actions/members";
 import { GetAccountMembersResponse } from "@usebasejump/shared";
 import { useState } from "react";
 import { Checkbox } from "../ui/checkbox";
@@ -59,7 +59,7 @@ export default function EditTeamMemberRoleForm({ accountId, teamMember, isPrimar
         </div>
       )}
       <SubmitButton
-        formAction={updateTeamMemberRole}
+        formAction={updateMemberRole}
         pendingText="Updating..."
       >
         Update Role

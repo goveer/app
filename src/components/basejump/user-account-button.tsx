@@ -1,65 +1,61 @@
-import {Button} from "@/components/ui/button"
+'use client'
+
+import { createClient } from "@/lib/supabase/client";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from "next/link";
-import {UserIcon} from "lucide-react";
-import {createClient} from "@/lib/supabase/server";
-import {redirect} from "next/navigation";
+import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default async function UserAccountButton() {
-    const supabaseClient = createClient();
-    const {data: personalAccount} = await supabaseClient.rpc('get_personal_account');
+export default function UserAccountButton() {
+    const [personalAccount, setPersonalAccount] = useState<any>(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        async function fetchPersonalAccount() {
+            const supabaseClient = await createClient();
+            const { data } = await supabaseClient.rpc('get_personal_account');
+            if (data) {
+                setPersonalAccount(data);
+            }
+        }
+
+        fetchPersonalAccount();
+    }, []);
 
     const signOut = async () => {
-        'use server'
+        const supabaseClient = await createClient();
+        await supabaseClient.auth.signOut();
+        router.push('/login');
+    };
 
-        const supabase = createClient()
-        await supabase.auth.signOut()
-        return redirect('/')
-    }
+    if (!personalAccount) return null;
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost">
-                    <UserIcon />
-                </Button>
+                <Button variant="outline">{personalAccount.name}</Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{personalAccount.name}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                            {personalAccount.email}
-                        </p>
-                    </div>
-                </DropdownMenuLabel>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem asChild>
-                        <Link href="/dashboard">My Account</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="/dashboard/settings">Settings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="/dashboard/settings/teams">Teams</Link>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => router.push(`/dashboard/${personalAccount.slug}`)}>
+                    Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push(`/dashboard/${personalAccount.slug}/settings`)}>
+                    Settings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                <form action={signOut}>
-                    <button>Log out</button>
-                </form>
+                <DropdownMenuItem onClick={signOut}>
+                    Sign out
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    )
+    );
 }

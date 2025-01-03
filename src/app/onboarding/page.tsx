@@ -1,17 +1,16 @@
 import Image from "next/image";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import { LoopsClient } from "@/lib/loops/server";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { MultiStepForm } from "@/components/ui/multi-step-form";
 
 export default async function Onboarding() {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const supabase = await createClient();
 
-  if (!session) {
+  // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
     redirect('/login');
   }
 
@@ -19,15 +18,16 @@ export default async function Onboarding() {
     "use server";
     
     const origin = headers().get("origin");
-    const loops = new LoopsClient(process.env.LOOPS_API_KEY as string);
     
-    // Update contact with form data
-    const { success } = await loops.updateContact(session.user.email!, {
-      ...formData,
-      onboardingCompleted: true,
+    // Update user metadata with form data
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        onboardingCompleted: true,
+        ...Object.fromEntries(formData)
+      }
     });
 
-    if (!success) {
+    if (updateError) {
       return redirect('/onboarding?message=Failed to update profile');
     }
 

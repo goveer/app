@@ -5,17 +5,30 @@ import { Badge } from "../ui/badge";
 import CreateTeamInvitationButton from "./create-team-invitation-button";
 import { formatDistanceToNow } from "date-fns";
 import DeleteTeamInvitationButton from "./delete-team-invitation-button";
+import { useState, useEffect } from "react";
 
 type Props = {
     accountId: string;
 }
 
-export default async function ManageTeamInvitations({ accountId }: Props) {
-    const supabaseClient = createClient();
+export default function ManageTeamInvitations({ accountId }: Props) {
+    const [invitations, setInvitations] = useState<any[]>([]);
 
-    const { data: invitations } = await supabaseClient.rpc('get_account_invitations', {
-        account_id: accountId
-    });
+    useEffect(() => {
+        async function fetchInvitations() {
+            const supabaseClient = await createClient();
+
+            const { data: invitations } = await supabaseClient.rpc('get_account_invitations', {
+                account_id: accountId
+            });
+
+            if (invitations) {
+                setInvitations(invitations);
+            }
+        }
+
+        fetchInvitations();
+    }, [accountId]);
 
     return (
         <Card>

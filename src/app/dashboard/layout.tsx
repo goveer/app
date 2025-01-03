@@ -1,32 +1,22 @@
-"use client";
-import { Inter } from 'next/font/google'
-import "@/app/globals.css"
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { DashboardSplash } from "@/components/dashboard/dashboard-splash"
-import { useSearchParams } from 'next/navigation';
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { DashboardClientLayout } from "@/components/dashboard/dashboard-client-layout";
 
-const inter = Inter({ subsets: ["latin"] })
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const searchParams = useSearchParams();
-  const showSplash = searchParams.get('onboarding') === 'complete';
+  const supabase = await createClient();
+  
+  // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-  return (
-    <div className={`flex min-h-screen ${inter.className}`}>
-      <SidebarProvider defaultOpen>
-        <AppSidebar />
-        <main className="flex-1 overflow-auto bg-background">
-          {showSplash && <DashboardSplash />}
-          {children}
-        </main>
-      </SidebarProvider>
-    </div>
-  )
+  if (error || !user) {
+    redirect('/login');
+  }
+
+  return <DashboardClientLayout>{children}</DashboardClientLayout>;
 }
 
 

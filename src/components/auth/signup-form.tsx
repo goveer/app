@@ -5,19 +5,25 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 interface SignUpFormProps {
-  signUpAction: (formData: FormData) => Promise<void>;
+  signUpAction: (formData: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>;
   message?: string;
 }
 
 export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
   const [email, setEmail] = useState("");
-  const isEmailValid = email.length > 0 && email.includes("@");
+  const [status, setStatus] = useState<{ error?: string; message?: string }>();
+  const isValid = email.length > 0 && email.includes("@");
+
+  const handleSubmit = async (formData: FormData) => {
+    const result = await signUpAction(formData);
+    setStatus(result);
+  };
 
   return (
-    <form className="space-y-4">
+    <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
-          Enter your email
+          Email
         </label>
         <Input
           id="email"
@@ -29,19 +35,20 @@ export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
           required
         />
       </div>
+
       <SubmitButton
-        formAction={signUpAction}
-        className={`w-full bg-[#46296B] hover:bg-[#46296B]/90 ${!isEmailValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+        formAction={async (prevState: any, formData: FormData) => handleSubmit(formData)}
+        className={`w-full bg-[#46296B] hover:bg-[#46296B]/90 ${!isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
         effect="shineHover"
         pendingText="Sending Magic Link..."
-        disabled={!isEmailValid}
+        disabled={!isValid}
       >
         Send Magic Link
       </SubmitButton>
 
-      {message && (
-        <p className="text-sm text-center text-muted-foreground">
-          {message}
+      {(status?.message || status?.error || message) && (
+        <p className={`text-sm text-center ${status?.error ? 'text-red-500' : 'text-muted-foreground'}`}>
+          {status?.error || status?.message || message}
         </p>
       )}
 

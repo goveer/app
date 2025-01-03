@@ -3,52 +3,85 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 
-export async function removeTeamMember(prevState: any, formData: FormData) {
-    "use server";
+export async function inviteMember(formData: FormData) {
+    const supabase = await createClient();
 
-    const userId = formData.get("userId") as string;
-    const accountId = formData.get("accountId") as string;
-    const returnUrl = formData.get("returnUrl") as string;
-    const supabase = createClient();
+    // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    const { error } = await supabase.rpc('remove_account_member', {
-        user_id: userId,
-        account_id: accountId
-    });
-
-    if (error) {
-        return {
-            message: error.message
-        };
+    if (userError || !user) {
+        redirect('/login');
     }
 
-    redirect(returnUrl);
-};
+    const email = formData.get('email') as string;
+    const teamId = formData.get('teamId') as string;
+    const role = formData.get('role') as string;
 
-
-export async function updateTeamMemberRole(prevState: any, formData: FormData) {
-    "use server";
-
-    const userId = formData.get("userId") as string;
-    const accountId = formData.get("accountId") as string;
-    const newAccountRole = formData.get("accountRole") as string;
-    const returnUrl = formData.get("returnUrl") as string;
-    const makePrimaryOwner = formData.get("makePrimaryOwner");
-
-    const supabase = createClient();
-
-    const { error } = await supabase.rpc('update_account_user_role', {
-        user_id: userId,
-        account_id: accountId,
-        new_account_role: newAccountRole,
-        make_primary_owner: makePrimaryOwner
-    });
+    const { error } = await supabase
+        .from('team_invitations')
+        .insert({
+            team_id: teamId,
+            email,
+            role,
+            invited_by: user.id,
+        });
 
     if (error) {
-        return {
-            message: error.message
-        };
+        return redirect(`/teams/${teamId}/members?error=Could not invite member`);
     }
 
-    redirect(returnUrl);
-};
+    return redirect(`/teams/${teamId}/members?success=Invitation sent`);
+}
+
+export async function removeMember(formData: FormData) {
+    const supabase = await createClient();
+
+    // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect('/login');
+    }
+
+    const memberId = formData.get('memberId') as string;
+    const teamId = formData.get('teamId') as string;
+
+    const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', memberId)
+        .eq('team_id', teamId);
+
+    if (error) {
+        return redirect(`/teams/${teamId}/members?error=Could not remove member`);
+    }
+
+    return redirect(`/teams/${teamId}/members?success=Member removed`);
+}
+
+export async function updateMemberRole(formData: FormData) {
+    const supabase = await createClient();
+
+    // SECURITY: Using getUser() instead of getSession() for secure server-side auth
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        redirect('/login');
+    }
+
+    const memberId = formData.get('memberId') as string;
+    const teamId = formData.get('teamId') as string;
+    const role = formData.get('role') as string;
+
+    const { error } = await supabase
+        .from('team_members')
+        .update({ role })
+        .eq('id', memberId)
+        .eq('team_id', teamId);
+
+    if (error) {
+        return redirect(`/teams/${teamId}/members?error=Could not update member role`);
+    }
+
+    return redirect(`/teams/${teamId}/members?success=Member role updated`);
+}

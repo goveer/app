@@ -14,6 +14,9 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarRail,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
 interface NavigationItem {
@@ -67,51 +70,49 @@ const navigation: NavigationGroup[] = [
   }
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar>
+    <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem className="group/menu-item relative">
-            <Link 
-              href="/"
-              className="peer/menu-button ring-sidebar-ring active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left outline-none transition-[width,height,padding] focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium group-data-[collapsible=icon]:!size-8 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-12 text-sm group-data-[collapsible=icon]:!p-0"
-            >
+          <SidebarMenuItem href="/">
+            <div className="flex items-center gap-3">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <GalleryVerticalEnd className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">City East Unit</span>
-                <span className="text-xs text-muted-foreground">Acres Health</span>
+                <span className="font-semibold">Documentation</span>
+                <span className="">v1.0.0</span>
               </div>
-            </Link>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="p-2">
-        {navigation.map((group) => (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel className="px-2 py-2">{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <Link 
-                      href={item.href}
-                      className={`flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-accent ${
-                        item.isActive ? 'bg-accent' : ''
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.title}
-                    </Link>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            {navigation.map((group) => (
+              <React.Fragment key={group.title}>
+                <SidebarMenuItem href={group.items[0].href}>
+                  {group.title}
+                </SidebarMenuItem>
+                {group.items.length > 1 && (
+                  <SidebarMenuSub label={group.title}>
+                    {group.items.slice(1).map((item) => (
+                      <SidebarMenuSubItem key={item.title} href={item.href}>
+                        {item.title}
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </React.Fragment>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
+      <SidebarRail>
+        <div className="flex h-full" />
+      </SidebarRail>
     </Sidebar>
   )
 }
