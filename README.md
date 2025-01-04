@@ -1,58 +1,137 @@
-# Basejump Nextjs Starter
+# Veer App
 
-Adds a Nextjs starter app on top of [Basejump core](https://github.com/usebasejump/basejump). This is a complete interface with support for personal accounts, team accounts, invitations, managing members/permissions and subscription billing.
+A modern healthcare scheduling and management application built with Next.js 13+.
 
-[Learn more at usebasejump.com](https://usebasejump.com). Ask questions [on X / Twitter](https://twitter.com/tiniscule)
+## Project Structure
 
-![Image Description](./public/images/basejump-team-page.png)
+```
+src/
+├── app/                    # App router pages
+│   ├── dashboard/         # Dashboard routes
+│   ├── auth/             # Auth routes
+│   │   ├── callback/     # OAuth callback
+│   │   └── confirm/      # Email confirmation
+│   ├── login/           # Login page
+│   └── signup/          # Signup page
+├── components/
+│   ├── ui/              # Base UI components
+│   ├── dashboard/       # Dashboard-specific components
+│   ├── auth/           # Authentication components
+│   └── layout/         # Layout components
+└── lib/
+    ├── supabase/       # Supabase clients
+    │   ├── client.ts   # Browser client
+    │   ├── server.ts   # Server client
+    │   └── middleware.ts # Auth middleware
+    └── utils/          # Helper functions
+```
 
-## Basejump Core Features
+## Tech Stack
 
-- **Personal accounts**: Every user that signs up using Supabase auth automatically gets their own personal account.
-  Billing on personal accounts can be enabled/disabled.
-- **Team accounts**: Team accounts are billable accounts that can be shared by multiple users. Team accounts can be
-  disabled if you only wish to allow personal accounts. Billing on team accounts can also be disabled.
-- **Permissions**: Permissions are handled using RLS, just like you're used to with Supabase. Basejump provides
-  convenience methods that let you restrict access to rows based on a user's account access and role within an account
-- **Billing**: Basejump provides out of the box billing support for Stripe, but you can add your own providers easily.
-  If you do, please consider contributing them so others can benefit!
-- **Testing**: Basejump is fully tested itself, but also provides a suite of testing tools that make it easier to test
-  your own Supabase functions and schema. You can check it out
-  at [database.dev/basejump/supabase_test_helpers](https://database.dev/basejump/supabase_test_helpers). You do not need
-  to be using Basejump to use the testing tools.
+- **Framework**: Next.js 13+ (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: 
+  - Radix UI (Primitives)
+  - Shadcn/ui (Component System)
+- **Database**: Supabase
+- **Authentication**: Supabase Auth
+- **State Management**: React Server Components + Client Hooks
+- **Deployment**: Vercel
 
-## Next Frontend Features
+## Key Dependencies
 
-- **Basic Dashboard**: A basic dashboard implementation restricted to authenticated users
-- **User Authentication**: Support for email/password - but add any auth provider supported by Supabase
-- **Personal accounts**: Every user that signs up using Supabase auth automatically gets their own personal account.
-  Billing on personal accounts can be enabled/disabled.
-- **Team accounts**: Team accounts are billable accounts that can be shared by multiple users. Team accounts can be
-  disabled if you only wish to allow personal accounts. Billing on team accounts can also be disabled.
-- **Billing**: Basejump provides out of the box billing support for Stripe, but you can add your own providers easily.
-  If you do, please consider contributing them so others can benefit!
+```json
+{
+  "dependencies": {
+    "next": "13.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "typescript": "5.x",
+    "@radix-ui/react-*": "Latest",
+    "@supabase/supabase-js": "Latest",
+    "@supabase/auth-helpers-nextjs": "Latest",
+    "tailwindcss": "3.x",
+    "lucide-react": "Latest",
+    "class-variance-authority": "Latest",
+    "clsx": "Latest",
+    "tailwind-merge": "Latest"
+  }
+}
+```
 
-## Quick Start
+## Design System
 
-1. Run `yarn install`
-2. Run `supabase start`
-3. Create a `.env.local` copy of the `.env.example` file with the correct values for Supabase
-4. Run `yarn dev`
+### Colors
+- Primary: `#46296B`
+- Secondary: `#F43F5E`
+- Background: `#FFFFFF`
+- Text: `#1F2937`
+- Muted Text: `#64748B`
+- Border: `#E2E8F0`
 
-When you're ready to work on billing, you'll need to set up a Stripe account and add your Stripe keys to your `supabase/functions/.env` file. There's an example file you can copy.
+### Typography
+- Font Family: IBM Plex Sans
+- Font Weights: 400 (normal), 500 (medium), 600 (semibold), 700 (bold)
+- Base Font Size: 16px
+- Scale: Tailwind's default type scale
 
-## Helpful Links
+### Components
+- Consistent use of Radix UI primitives
+- Custom styled components using Tailwind CSS
+- Dark mode support via CSS variables
+- Responsive design patterns
 
-- [Basejump Docs](https://usebasejump.com/docs)
-- [Creating new protected tables](https://usebasejump.com/docs/example-schema)
-- [Testing your Supabase functions](https://usebasejump.com/docs/testing)
+## Development
+
+```bash
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+
+# Build for production
+yarn build
+
+# Start production server
+yarn start
+
+# Run linting
+yarn lint
+```
+
+### Environment Variables
+
+Create a `.env.local` file:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Best Practices
+
+- Server Components by default
+- Client Components when needed (`'use client'`)
+- Server Actions for forms
+- Strong TypeScript typing
+- Component composition
+- CSS variables for theming
+- Consistent error handling
+- Proper loading states
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## Contributing
 
-Yes please! Please submit a PR with your changes to [the basejump-next github repo](https://github.com/usebasejump/basejump-next).
-
-You can contribute in the following places:
-- [Basejump core](https://github.com/usebasejump/basejump)
-- [Basejump Nextjs](https://github.com/usebasejump/basejump-next)
-- [Basejump edge functions / billing functions](https://github.com/usebasejump/basejump-deno-packages)
-- [Supabase Test Helpers](https://github.com/usebasejump/supabase-test-helpers)
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
