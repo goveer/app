@@ -72,11 +72,11 @@ export default function SignUp({
           <div className="grid w-full h-screen grid-cols-1 gap-20 md:grid-cols-2 place-content-center">
             <div className="flex flex-col justify-center space-y-4">
               <h1 className="text-6xl font-bold leading-tight lg:text-7xl">
-                <span className="text-white [text-shadow:_0_1px_3px_#46296b52]">Ready. Set.</span>{' '}
+                <span className="text-[#2e1065]">Ready. Set.</span>{' '}
                 <span className="text-rose-600">Optimize.</span>
               </h1>
-              <p className="max-w-md text-lg font-medium text-white [text-shadow:_0_1px_3px_#46296b52]">
-                Veer is the first all-in-one platform that optimizes your schedules, routes, and staffing simultaneously.
+              <p className="max-w-md text-lg font-medium text-[#2e1065]">
+                Veer is the first all-in-one platform that optimizes schedules, routes, and staffing simultaneously.
               </p>
             </div>
 
