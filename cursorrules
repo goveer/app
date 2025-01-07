@@ -19,6 +19,22 @@ project/
 │       │   └── middleware.ts # Auth middleware
 │       └── utils/           # Helper functions
 
+# Veer Development Guidelines
+
+http://localhost:3001 # Port 3001 is required to maintain consistency with OAuth callback URLs and redirect URIs configured in Supabase, Stripe, and other services
+
+## Resources & Documentation
+
+- [Technical Specification](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/fbd7b564-61e7-4385-8804-91461cfee5e5)
+- [Development Guidelines](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/6148961e-edaa-403c-86f5-5c67b78094b7)
+- [Initial Onboarding Build Plan](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/ba1d4ab8-2381-4a7b-9ba2-d72da67e647a)
+
+### HIPAA Compliance Documentation
+- [HIPAA Strategy](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/1c6f8796-b5cb-4a8a-8d30-f7e81d913c42)
+- [HIPAA Safe Harbor Method](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/0855f4a2-ca22-42af-815b-6001c48dc713)
+- [De-Identified PHI](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/1abf6bf4-5c4b-4da4-9379-0dfa4c60e200)
+- [HIPAA Compliance for Healthcare Provider Apps](https://app.plane.so/veer/projects/1c27993d-148e-4353-a869-351af12d9be6/pages/e04608bb-cf92-456b-8e99-bb1b14bc48db)
+
 ## Local Environment Setup
 
 1. **Prerequisites**
@@ -27,6 +43,8 @@ project/
    - Git installed
    - A Supabase account
    - A Stripe account (for payment features)
+   - Vercel CLI (`yarn global add vercel`)
+   - Stripe CLI (for webhook testing)
 
 2. **Initial Setup**
    ```bash
@@ -36,12 +54,25 @@ project/
    
    # Install dependencies
    yarn install
+
+   # Install and configure Stripe CLI
+   brew install stripe/stripe-cli/stripe
+   stripe login
+
+   # Link project to Vercel
+   vercel link
    ```
 
 3. **Environment Variables**
    
    A. **Local Development**
-   Create a `.env.local` file in the root directory with your development variables:
+   Pull environment variables from Vercel:
+   ```bash
+   # Pull development environment variables
+   vercel env pull .env.local
+   ```
+
+   The `.env.local` file should contain:
    ```
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
@@ -51,6 +82,10 @@ project/
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
    STRIPE_SECRET_KEY=your_stripe_secret_key
    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+
+   # Basejump Configuration
+   NEXT_PUBLIC_BASEJUMP_URL=your_basejump_url
+   BASEJUMP_API_KEY=your_basejump_api_key
    ```
 
    B. **Vercel Environment Setup**
@@ -119,11 +154,11 @@ project/
 
 5. **Development Server**
    ```bash
-   # Start with Vercel development features
+   # Start Vercel development server with all features
    vercel dev
-   
-   # Or use standard Next.js development
-   yarn dev
+
+   # In a separate terminal, start Stripe webhook listener
+   stripe listen --forward-to localhost:3001/api/webhooks/stripe
    ```
    The application will be available at http://localhost:3001
 
@@ -137,5 +172,10 @@ project/
    - All environment variables must be properly set
    - Supabase and Stripe credentials must be valid
    - Node.js version must be 18 or higher
+
+8. **Basejump Integration**
+   - Basejump is used for user management and authentication
+   - Configure Basejump in your Vercel project settings
+   - Test authentication flow locally using the Vercel dev server
 
 // ... existing code ... 
