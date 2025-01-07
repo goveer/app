@@ -1,0 +1,141 @@
+project/
+├── src/
+│   ├── app/                    # App router pages
+│   │   ├── dashboard/          # Dashboard routes
+│   │   ├── auth/              # Auth routes
+│   │   │   ├── callback/      # OAuth callback
+│   │   │   └── confirm/       # Email confirmation
+│   │   ├── login/            # Login page
+│   │   └── signup/           # Signup page
+│   ├── components/
+│   │   ├── ui/               # Base components
+│   │   ├── dashboard/        # Dashboard features
+│   │   ├── auth/            # Auth forms
+│   │   └── layout/          # Layout components
+│   └── lib/
+│       ├── supabase/        # Supabase clients
+│       │   ├── client.ts    # Browser client
+│       │   ├── server.ts    # Server client
+│       │   └── middleware.ts # Auth middleware
+│       └── utils/           # Helper functions
+
+## Local Environment Setup
+
+1. **Prerequisites**
+   - Node.js 18+ installed
+   - Yarn package manager installed
+   - Git installed
+   - A Supabase account
+   - A Stripe account (for payment features)
+
+2. **Initial Setup**
+   ```bash
+   # Clone the repository
+   git clone <repository-url>
+   cd app
+   
+   # Install dependencies
+   yarn install
+   ```
+
+3. **Environment Variables**
+   
+   A. **Local Development**
+   Create a `.env.local` file in the root directory with your development variables:
+   ```
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   
+   # Stripe Configuration
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+   ```
+
+   B. **Vercel Environment Setup**
+   1. Go to your Project Settings in Vercel Dashboard
+   2. Navigate to the Environment Variables section
+   3. Add variables for each environment:
+      - Production (main branch)
+      - Preview (preview branches)
+      - Development (local development)
+   4. Use the following naming pattern:
+      ```
+      Production: Use production credentials
+      Preview: Use staging/test credentials
+      Development: Use local test credentials
+      ```
+   5. Variables are encrypted at rest and only applied to new deployments
+
+   C. **Using Vercel CLI for Local Development**
+   ```bash
+   # Install Vercel CLI
+   yarn global add vercel
+
+   # Link your local project to Vercel
+   vercel link
+
+   # Pull environment variables
+   vercel env pull .env.local
+
+   # Start development with Vercel
+   vercel dev
+   ```
+
+4. **Preview Deployments**
+   
+   A. **GitHub Setup**
+   1. Create a preview branch:
+      ```bash
+      git checkout -b preview
+      git push -u origin preview
+      ```
+   2. Configure GitHub repository:
+      - Go to repository settings
+      - Set up branch protection rules for main and preview branches
+      - Enable required status checks
+
+   B. **Vercel Project Configuration**
+   1. In Vercel Dashboard:
+      - Go to Project Settings
+      - Under Git, configure:
+        - Production Branch: main
+        - Preview Branches: preview/*
+   2. Enable automatic deployments:
+      - Production: Deploys from main branch
+      - Preview: Deploys from preview branches
+      - Enable GitHub checks integration
+
+   C. **Development Workflow**
+   1. Feature development:
+      ```bash
+      git checkout -b feature/your-feature preview
+      # Make changes
+      git push -u origin feature/your-feature
+      ```
+   2. Create PR to preview branch for testing
+   3. Once tested, create PR to main for production
+
+5. **Development Server**
+   ```bash
+   # Start with Vercel development features
+   vercel dev
+   
+   # Or use standard Next.js development
+   yarn dev
+   ```
+   The application will be available at http://localhost:3001
+
+6. **Environment Validation**
+   - Ensure Supabase connection is working by visiting the login page
+   - Verify Stripe integration by checking the checkout page
+   - Confirm webhook endpoints are properly configured
+
+7. **Common Issues**
+   - Port 3001 must be available
+   - All environment variables must be properly set
+   - Supabase and Stripe credentials must be valid
+   - Node.js version must be 18 or higher
+
+// ... existing code ... 
