@@ -28,13 +28,39 @@ export default function SignUp({
 
   async function signUp(formData: FormData) {
     const email = formData.get("email") as string;
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const createdAt = formData.get("createdAt") as string;
     const supabase = createClient();
+
+    // First check if user exists by attempting to sign in
+    const { error: checkError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false, // This will fail if user doesn't exist
+      }
+    });
+
+    // If no error, user exists
+    if (!checkError) {
+      return { 
+        error: "An account with this email already exists. Please sign in instead.",
+        redirectTo: "/login"
+      };
+    }
     
+    // If we got here, user doesn't exist, proceed with signup
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
         emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
+        data: {
+          firstName,
+          lastName,
+          email,
+          createdAt
+        }
       },
     });
 

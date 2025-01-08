@@ -11,16 +11,51 @@ interface SignUpFormProps {
 
 export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [status, setStatus] = useState<{ error?: string; message?: string }>();
-  const isValid = email.length > 0 && email.includes("@");
+  const isValid = email.length > 0 && email.includes("@") && firstName.length > 0 && lastName.length > 0;
 
   const handleSubmit = async (formData: FormData) => {
+    formData.append("createdAt", new Date().toISOString());
     const result = await signUpAction(formData);
     setStatus(result);
   };
 
   return (
     <form action={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="firstName">
+            First Name
+          </label>
+          <Input
+            id="firstName"
+            name="firstName"
+            type="text"
+            placeholder="John"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="lastName">
+            Last Name
+          </label>
+          <Input
+            id="lastName"
+            name="lastName"
+            type="text"
+            placeholder="Doe"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
           Email

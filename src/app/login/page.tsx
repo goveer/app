@@ -34,11 +34,18 @@ export default function Login({
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
+        shouldCreateUser: false,
         emailRedirectTo: `${window.location.origin}/auth/confirm?type=signin`,
       },
     });
 
     if (error) {
+      if (error.message.toLowerCase().includes('user not found')) {
+        return { 
+          error: "No account found with this email. Please sign up first.",
+          redirectTo: "/signup"
+        };
+      }
       return { error: error.message };
     }
 
@@ -136,12 +143,6 @@ export default function Login({
                         {searchParams.message}
                       </p>
                     )}
-
-                    <p className="text-sm">
-                      <Link href="/forgot-password" className="text-sky-500 hover:text-sky-700">
-                        Forgot password?
-                      </Link>
-                    </p>
                   </form>
                 </CardContent>
               </Card>
