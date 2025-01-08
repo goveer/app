@@ -178,4 +178,72 @@ http://localhost:3001 # Port 3001 is required to maintain consistency with OAuth
    - Configure Basejump in your Vercel project settings
    - Test authentication flow locally using the Vercel dev server
 
+9. **Stripe Webhook Configuration**
+   A. **Required Events**
+   Configure the following events in your Stripe Dashboard and Stripe CLI:
+   ```bash
+   # Subscription events
+   customer.subscription.created
+   customer.subscription.updated
+   customer.subscription.deleted
+   customer.subscription.trial_will_end
+   customer.subscription.pending_update_applied    # For handling subscription changes
+   customer.subscription.pending_update_expired    # For handling failed subscription changes
+   customer.subscription.resumed                   # For handling unpaused subscriptions
+
+   # Subscription Schedule events
+   subscription_schedule.aborted     # When schedule is canceled due to delinquency
+   subscription_schedule.canceled    # When schedule is manually canceled
+   subscription_schedule.completed   # When new schedule is completed
+   subscription_schedule.created     # When new schedule is created
+   subscription_schedule.expiring    # 7 days before schedule expiration
+   subscription_schedule.released    # When schedule is released
+   subscription_schedule.updated     # When schedule is updated
+
+   # Payment events
+   payment_intent.succeeded
+   payment_intent.payment_failed
+   invoice.paid
+   invoice.payment_failed
+
+   # Customer events
+   customer.created
+   customer.updated
+   customer.deleted
+
+   # Checkout events
+   checkout.session.completed
+   checkout.session.expired
+
+   # Price/Product events (for subscription changes)
+   price.created
+   price.updated
+   product.created
+   product.updated
+   ```
+
+   B. **Local Testing**
+   When using `stripe listen`, forward all these events:
+   ```bash
+   stripe listen --forward-to localhost:3001/api/webhooks/stripe \
+     --events="customer.subscription.created,customer.subscription.updated,\
+     customer.subscription.deleted,customer.subscription.trial_will_end,\
+     customer.subscription.pending_update_applied,customer.subscription.pending_update_expired,\
+     customer.subscription.resumed,\
+     subscription_schedule.aborted,subscription_schedule.canceled,\
+     subscription_schedule.completed,subscription_schedule.created,\
+     subscription_schedule.expiring,subscription_schedule.released,\
+     subscription_schedule.updated,\
+     payment_intent.succeeded,payment_intent.payment_failed,\
+     invoice.paid,invoice.payment_failed,\
+     customer.created,customer.updated,customer.deleted,\
+     checkout.session.completed,checkout.session.expired,\
+     price.created,price.updated,product.created,product.updated"
+   ```
+
+   C. **Webhook Endpoints**
+   - Development: `http://localhost:3001/api/webhooks/stripe`
+   - Preview: `https://preview.veer.care/api/webhooks/stripe`
+   - Production: `https://veer.care/api/webhooks/stripe`
+
 // ... existing code ... 
