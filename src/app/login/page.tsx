@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
 import { Input } from "@/components/ui/input";
+import { isAuthApiError } from '@supabase/supabase-js';
 
 export default function Login({
   searchParams,
@@ -28,31 +29,62 @@ export default function Login({
   }
 
   async function signIn(formData: FormData) {
-    const email = formData.get("email") as string;
-    const supabase = createClient();
-    
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: `${window.location.origin}/auth/confirm?type=signin`,
-      },
-    });
+    try {
+      const email = formData.get("email") as string;
+      const supabase = createClient();
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?type=signin`,
+        },
+      });
 
-    if (error) {
-      if (error.message.toLowerCase().includes('user not found')) {
-        return { 
-          error: "No account found with this email. Please sign up first.",
-          redirectTo: "/signup"
-        };
+      if (error) {
+        console.error('Auth error details:', { 
+          name: error.name,
+          message: error.message,
+          status: isAuthApiError(error) ? error.status : undefined,
+          code: isAuthApiError(error) ? error.code : undefined
+        });
+
+        if (isAuthApiError(error)) {
+          switch (error.status) {
+            case 422:
+              return { error: 'Email is invalid or not allowed' };
+            case 429:
+              return { error: 'Too many sign in attempts. Please try again later' };
+            default:
+              if (error.message.toLowerCase().includes('user not found')) {
+                return { 
+                  error: "No account found with this email",
+                  redirectTo: "/signup"
+                };
+              }
+              return { error: error.message };
+          }
+        }
+
+        // Handle custom auth errors
+        switch (error.name) {
+          case 'AuthRetryableFetchError':
+            return { error: 'Network connection issue - please check your connection' };
+          default:
+            return { error: error.message || 'An unexpected error occurred during sign in' };
+        }
       }
-      return { error: error.message };
-    }
 
-    return { 
-      success: true,
-      message: "Check your email for the magic link to sign in." 
-    };
+      return { 
+        success: true,
+        message: "Check your email for the magic link to sign in." 
+      };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { 
+        error: error?.message || "An unexpected error occurred during sign in" 
+      };
+    }
   }
 
   return (

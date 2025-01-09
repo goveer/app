@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
+import { isAuthApiError } from '@supabase/supabase-js';
 
 export default function SignUp({
   searchParams,
@@ -27,51 +28,61 @@ export default function SignUp({
   }
 
   async function signUp(formData: FormData) {
-    const email = formData.get("email") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const createdAt = formData.get("createdAt") as string;
-    const supabase = createClient();
+    try {
+      const email = formData.get("email") as string;
+      const firstName = formData.get("firstName") as string;
+      const lastName = formData.get("lastName") as string;
+      const supabase = createClient();
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        },
+      });
 
-    // First check if user exists by attempting to sign in
-    const { error: checkError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false, // This will fail if user doesn't exist
+      if (error) {
+        console.error('Auth error details:', { 
+          name: error.name,
+          message: error.message,
+          status: isAuthApiError(error) ? error.status : undefined,
+          code: isAuthApiError(error) ? error.code : undefined
+        });
+
+        if (isAuthApiError(error)) {
+          switch (error.status) {
+            case 422:
+              return { error: 'Email is invalid or not allowed' };
+            case 429:
+              return { error: 'Too many signup attempts. Please try again later' };
+            default:
+              return { error: error.message };
+          }
+        }
+
+        // Handle custom auth errors
+        switch (error.name) {
+          case 'AuthRetryableFetchError':
+            return { error: 'Network connection issue - please check your connection' };
+          default:
+            return { error: error.message || 'An unexpected error occurred during signup' };
+        }
       }
-    });
 
-    // If no error, user exists
-    if (!checkError) {
       return { 
-        error: "An account with this email already exists. Please sign in instead.",
-        redirectTo: "/login"
+        success: true,
+        message: "Check your email for the magic link to complete your signup." 
+      };
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      return { 
+        error: error?.message || "An unexpected error occurred during signup" 
       };
     }
-    
-    // If we got here, user doesn't exist, proceed with signup
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
-        data: {
-          firstName,
-          lastName,
-          email,
-          createdAt
-        }
-      },
-    });
-
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { 
-      success: true,
-      message: "Check your email for the magic link to complete your signup." 
-    };
   }
 
   return (

@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
     
-    const { error } = await supabase.auth.verifyOtp({
+    // Verify the OTP and get the session
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     })
@@ -25,6 +26,11 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Error verifying OTP:', error)
       return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+    }
+
+    if (!session) {
+      console.error('No session returned from verifyOtp')
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Invalid session')}`)
     }
 
     // For new signups, redirect to onboarding

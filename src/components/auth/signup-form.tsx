@@ -5,7 +5,12 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 interface SignUpFormProps {
-  signUpAction: (formData: FormData) => Promise<{ error?: string; success?: boolean; message?: string }>;
+  signUpAction: (formData: FormData) => Promise<{
+    error?: string;
+    success?: boolean;
+    message?: string;
+    redirectTo?: string;
+  }>;
   message?: string;
 }
 
@@ -13,13 +18,33 @@ export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [status, setStatus] = useState<{ error?: string; message?: string }>();
+  const [status, setStatus] = useState<{
+    error?: string;
+    message?: string;
+    redirectTo?: string;
+  }>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isValid = email.length > 0 && email.includes("@") && firstName.length > 0 && lastName.length > 0;
 
   const handleSubmit = async (formData: FormData) => {
-    formData.append("createdAt", new Date().toISOString());
-    const result = await signUpAction(formData);
-    setStatus(result);
+    try {
+      setIsSubmitting(true);
+      formData.append("createdAt", new Date().toISOString());
+      const result = await signUpAction(formData);
+      
+      if (result.redirectTo) {
+        window.location.href = result.redirectTo;
+        return;
+      }
+      
+      setStatus(result);
+    } catch (error: any) {
+      setStatus({
+        error: error?.message || "An unexpected error occurred"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -73,16 +98,20 @@ export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
 
       <SubmitButton
         formAction={async (prevState: any, formData: FormData) => handleSubmit(formData)}
-        className={`w-full bg-[#46296B] hover:bg-[#46296B]/90 ${!isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full bg-[#46296B] hover:bg-[#46296B]/90 ${!isValid || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         effect="shineHover"
         pendingText="Sending Magic Link..."
-        disabled={!isValid}
+        disabled={!isValid || isSubmitting}
       >
         Send Magic Link
       </SubmitButton>
 
       {(status?.message || status?.error || message) && (
-        <p className={`text-sm text-center ${status?.error ? 'text-red-500' : 'text-muted-foreground'}`}>
+        <p 
+          className={`text-sm text-center ${
+            status?.error ? 'text-red-500' : 'text-emerald-600'
+          }`}
+        >
           {status?.error || status?.message || message}
         </p>
       )}

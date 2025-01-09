@@ -44,6 +44,63 @@ project/
 - Magic link authentication
 - Server actions for auth operations
 
+### Auth Flow Implementation
+- Use `signInWithOtp` for both signup and login flows
+- Signup uses default behavior (auto-creates users)
+- Login requires `shouldCreateUser: false` to prevent new user creation
+- Proper payload structure:
+  ```typescript
+  // Signup
+  await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
+      data: {
+        first_name: firstName,
+        last_name: lastName
+      }
+    }
+  });
+
+  // Login
+  await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${window.location.origin}/auth/confirm?type=signin`
+    }
+  });
+  ```
+
+### Error Handling
+- Use `isAuthApiError` for type checking
+- Handle common status codes:
+  - 422: Invalid email format
+  - 429: Rate limiting (too many attempts)
+- Structure:
+  ```typescript
+  if (isAuthApiError(error)) {
+    switch (error.status) {
+      case 422: return { error: 'Email is invalid or not allowed' };
+      case 429: return { error: 'Too many attempts. Please try again later' };
+      default: return { error: error.message };
+    }
+  }
+  ```
+
+### Redirect URLs
+- Include `type` parameter for different flows:
+  - `/auth/confirm?type=signup` for signup
+  - `/auth/confirm?type=signin` for login
+  - `/auth/callback` for OAuth (Google)
+- Response format:
+  ```typescript
+  // Success
+  { success: true, message: "Check your email for the magic link" }
+  // Error
+  { error: string, redirectTo?: string }
+  ```
+
 ### Auth Routing Rules
 - Use NextResponse instead of redirect in route handlers for better error handling
 - Keep auth-related redirects consistent:
@@ -98,6 +155,174 @@ export function Component({ title, className, ...props }: ComponentProps) {
 - Subheaders: "text-lg font-medium"
 - Body: "text-sm"
 - Muted: "text-sm text-muted-foreground"
+
+### Responsive Design Guidelines
+
+#### Core Principles
+
+##### Layout Structure
+- Always implement mobile-first design
+- Wrap main content in responsive containers
+- Use proper min-height handling for full-page layouts
+- Implement sticky headers/footers correctly
+- Consider content reflow at all breakpoints
+
+```tsx
+// Base layout pattern
+<div className="min-h-screen flex flex-col">
+  <header className="sticky top-0 z-50">
+    {/* Header content */}
+  </header>
+  
+  <main className="flex-1 container mx-auto px-4 py-8">
+    {/* Main content */}
+  </main>
+</div>
+```
+
+##### Viewport Management
+- Use Tailwind's responsive viewport classes
+- Implement proper breakpoint handling
+- Consider touch targets on mobile
+- Handle overflow properly
+
+```tsx
+// Common viewport classes
+"min-h-screen"          // Minimum full viewport height
+"h-dvh"                 // Dynamic viewport height (mobile browsers)
+"touch-auto"            // Proper touch behavior
+"overflow-y-auto"       // Scrollable content
+"overscroll-contain"    // Prevent scroll bleed
+```
+
+##### Spacing & Typography
+- Use responsive spacing utilities
+- Implement fluid typography
+- Maintain proper content hierarchy
+- Consider line lengths
+
+```tsx
+// Responsive spacing and typography
+"space-y-4 md:space-y-6 lg:space-y-8"
+"text-sm md:text-base lg:text-lg"
+"max-w-prose"              // Optimal reading width
+"leading-normal md:leading-relaxed"
+```
+
+#### shadcn Implementation
+
+##### Component Containers
+- Always wrap shadcn components appropriately
+- Use responsive width constraints
+- Consider component spacing in layouts
+- Leverage shadcn's built-in responsive features
+
+```tsx
+// Card example with proper responsive wrapping
+<Card className="w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl">
+  <CardHeader className="space-y-2 md:space-y-4">
+    <CardTitle className="text-xl md:text-2xl lg:text-3xl">
+      Title
+    </CardTitle>
+    <CardDescription className="text-sm md:text-base">
+      Description
+    </CardDescription>
+  </CardHeader>
+</Card>
+```
+
+##### Dialog/Sheet Pattern
+- Use Sheet on mobile, Dialog on desktop
+- Handle bottom sheets properly
+- Consider keyboard input on different devices
+
+```tsx
+// Responsive dialog pattern
+<Sheet>
+  <SheetContent 
+    side="bottom" 
+    className="h-[96%] sm:h-auto rounded-t-xl"
+  >
+    <SheetHeader className="space-y-2 md:space-y-4">
+      <SheetTitle>Title</SheetTitle>
+    </SheetHeader>
+    {/* Content */}
+  </SheetContent>
+</Sheet>
+```
+
+##### Form Components
+- Ensure proper input sizing across devices
+- Handle touch targets appropriately
+- Consider keyboard experience
+- Maintain proper label alignment
+
+```tsx
+// Responsive form layout
+<div className="space-y-4 md:space-y-6">
+  <div className="grid gap-4 md:grid-cols-2">
+    <div className="space-y-2">
+      <Label className="text-sm md:text-base">
+        Field Label
+      </Label>
+      <Input className="h-10 md:h-11 lg:h-12" />
+    </div>
+  </div>
+</div>
+```
+
+#### Navigation Patterns
+
+##### Mobile Navigation
+- Use proper hamburger menus
+- Implement bottom navigation when appropriate
+- Consider thumb zones
+- Handle gestures appropriately
+
+```tsx
+// Bottom navigation example
+<nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+  <div className="flex justify-around items-center h-16 bg-background border-t">
+    {/* Navigation items */}
+  </div>
+</nav>
+```
+
+##### Desktop Navigation
+- Implement proper dropdown behaviors
+- Handle hover states
+- Consider window resizing
+- Maintain accessibility
+
+```tsx
+// Responsive navigation
+<nav className="hidden md:flex items-center space-x-4">
+  {/* Desktop navigation items */}
+</nav>
+```
+
+#### Best Practices
+
+##### Performance
+- Lazy load off-screen content
+- Use responsive images
+- Implement proper loading states
+- Handle content reflow
+
+##### Accessibility
+- Maintain proper focus management
+- Implement keyboard navigation
+- Use appropriate ARIA attributes
+- Test with screen readers
+
+##### Testing
+- Test at all standard breakpoints:
+  - Mobile: 320px - 480px
+  - Tablet: 481px - 768px
+  - Desktop: 769px+
+- Test in different browsers
+- Test touch interactions
+- Verify keyboard navigation
 
 ## Development Principles
 
