@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
 import { Input } from "@/components/ui/input";
 import { isAuthApiError } from '@supabase/supabase-js';
+import { LoginForm } from "@/components/auth/login-form";
 
 export default function Login({
   searchParams,
@@ -38,6 +39,9 @@ export default function Login({
         options: {
           shouldCreateUser: false,
           emailRedirectTo: `${window.location.origin}/auth/confirm?type=signin`,
+          data: {
+            transaction_id: 'cm5py31dj00epwg226hnkpsfi'
+          }
         },
       });
 
@@ -149,33 +153,10 @@ export default function Login({
                     </div>
                   </div>
 
-                  <form action={signIn} className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
-                        Email
-                      </label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="me@example.com"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full bg-[#46296B] hover:bg-[#46296B]/90 text-white py-2 px-4 rounded-md"
-                    >
-                      Continue
-                    </button>
-
-                    {(searchParams?.message) && (
-                      <p className="text-sm text-muted-foreground">
-                        {searchParams.message}
-                      </p>
-                    )}
-                  </form>
+                  <LoginForm 
+                    signInAction={signIn}
+                    message={searchParams?.message}
+                  />
                 </CardContent>
               </Card>
             </div>

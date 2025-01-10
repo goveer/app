@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/ui/google-button";
 import { isAuthApiError } from '@supabase/supabase-js';
+import Link from "next/link";
 
 export default function SignUp({
   searchParams,
@@ -39,6 +40,7 @@ export default function SignUp({
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
           data: {
+            transaction_id: 'cm5py31dj00epwg226hnkpsfi',
             first_name: firstName,
             last_name: lastName
           }
@@ -121,8 +123,14 @@ export default function SignUp({
               <Card className="w-full max-w-[420px]">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-[24px] text-[#46296B] text-center leading-[1.2]">
-                    Optimize your first Veer<br />schedule in seconds
+                    Optimized schedules in seconds
                   </CardTitle>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-sky-500 hover:text-sky-700 font-semibold">
+                      Sign in
+                    </Link>
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <GoogleButton 

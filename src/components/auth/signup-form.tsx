@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 
@@ -115,13 +114,6 @@ export function SignUpForm({ signUpAction, message }: SignUpFormProps) {
           {status?.error || status?.message || message}
         </p>
       )}
-
-      <p className="text-sm text-center text-muted-foreground">
-        Already have an account?{' '}
-        <Link href="/login" className="text-sky-500 hover:text-sky-700 font-semibold">
-          Sign in
-        </Link>
-      </p>
     </form>
   );
 } 

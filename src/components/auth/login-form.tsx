@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 
@@ -48,7 +47,7 @@ export function LoginForm({ signInAction, message }: LoginFormProps) {
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
-          Enter your email
+          Enter your email to receive a magic link
         </label>
         <Input
           id="email"
@@ -80,13 +79,6 @@ export function LoginForm({ signInAction, message }: LoginFormProps) {
           {status?.error || status?.message || message}
         </p>
       )}
-
-      <p className="text-sm text-center text-muted-foreground">
-        Don't have an account?{' '}
-        <Link href="/signup" className="text-sky-500 hover:text-sky-700 font-semibold">
-          Sign up
-        </Link>
-      </p>
     </form>
   );
 } 

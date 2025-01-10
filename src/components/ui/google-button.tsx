@@ -17,8 +17,7 @@ export function GoogleButton({
       variant="outline"
       onClick={onClick}
       disabled={isLoading}
-      className="w-full bg-white hover:bg-gray-50 text-gray-900 gap-2"
-      effect="shineHover"
+      className="w-full bg-white hover:bg-gray-50 text-gray-900 hover:text-gray-900 gap-2"
     >
       <Image
         src="/images/google.svg"
