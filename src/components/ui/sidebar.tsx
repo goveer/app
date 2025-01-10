@@ -411,7 +411,7 @@ const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.ComponentProp
     <div
       ref={ref}
       data-sidebar="group-content"
-      className={cn("w-full text-sm font-ibm-sans", className)}
+      className={cn("w-full text-body-sm", className)}
       {...props}
     />
   )
@@ -504,7 +504,7 @@ const SidebarMenuBadge = React.forwardRef<HTMLDivElement, React.ComponentProps<"
       ref={ref}
       data-sidebar="menu-badge"
       className={cn(
-        "absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums text-sidebar-foreground select-none pointer-events-none font-ibm-mono",
+        "absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-body-xs font-medium tabular-nums text-sidebar-foreground select-none pointer-events-none font-mono",
         "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",

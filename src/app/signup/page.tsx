@@ -91,72 +91,73 @@ export default function SignUp({
     <div 
       className="flex min-h-screen relative"
       style={{
-        backgroundImage: 'url("/images/gradient_bg.svg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: 'linear-gradient(129deg, rgba(244, 63, 94, 0.20) -1.17%, rgba(160, 202, 233, 0.80) 87.43%), #FFF'
       }}
     >
-      <div className="w-full max-w-[1600px] mx-auto relative px-4 md:px-8">
-        <div className="absolute left-8 top-8">
+      <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8 flex flex-col">
+        <header className="pt-8 pb-8 md:pb-12 lg:pb-16">
           <Image
             src="/images/veer-logo.svg"
             alt="Veer Logo"
             width={240}
             height={80}
+            className="w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-auto"
             priority
           />
-        </div>
+        </header>
 
-        <div className="max-w-[1100px] mx-auto">
-          <div className="grid w-full h-screen grid-cols-1 gap-20 md:grid-cols-2 place-content-center">
-            <div className="flex flex-col justify-center space-y-4">
-              <h1 className="text-6xl font-bold leading-tight lg:text-7xl">
-                <span className="text-[#2e1065]">Ready. Set.</span>{' '}
-                <span className="text-rose-600">Optimize.</span>
-              </h1>
-              <p className="max-w-md text-lg font-medium text-[#2e1065]">
-                Veer is the first all-in-one platform that optimizes schedules, routes, and staffing simultaneously.
-              </p>
-            </div>
+        <main className="pb-8 md:pb-12 lg:pb-16">
+          <div className="max-w-[1100px] w-full mx-auto">
+            <div className="grid w-full grid-cols-1 gap-8 lg:gap-20 lg:grid-cols-2 items-start">
+              <div className="flex flex-col justify-center space-y-4 text-center lg:text-left px-4 sm:px-6 lg:px-8">
+                <h1 className="text-[clamp(2rem,5vw,4.5rem)] font-bold leading-tight">
+                  <span className="text-[#2e1065] inline lg:block">Ready. Set.</span>{' '}
+                  <span className="text-rose-600 inline lg:block lg:mt-2">Optimize.</span>
+                </h1>
+                <p className="max-w-md mx-auto lg:mx-0 text-base md:text-lg font-medium text-[#2e1065]">
+                  Veer is the first all-in-one platform that optimizes schedules, routes, and staffing simultaneously.
+                </p>
+              </div>
 
-            <div className="flex items-center justify-center">
-              <Card className="w-full max-w-[420px]">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-[24px] text-[#46296B] text-center leading-[1.2]">
-                    Optimized schedules in seconds
-                  </CardTitle>
-                  <p className="text-sm text-center text-muted-foreground">
-                    Already have an account?{' '}
-                    <Link href="/login" className="text-sky-500 hover:text-sky-700 font-semibold">
-                      Sign in
-                    </Link>
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <GoogleButton 
-                    onClick={signUpWithGoogle}
-                  />
-                  
-                  <div className="relative py-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <Separator />
+              <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8">
+                <Card className="w-full max-w-[420px]">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-2xl font-semibold text-[#2e1065] leading-[1.2]">
+                      Get started with Veer
+                    </CardTitle>
+                    <p className="text-sm text-center text-muted-foreground mt-1">
+                      Already have an account?{' '}
+                      <Link href="/login" className="text-sky-500 hover:text-sky-700 font-semibold">
+                        Sign in
+                      </Link>
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <GoogleButton 
+                      onClick={signUpWithGoogle}
+                    />
+                    
+                    <div className="relative py-6">
+                      <div className="absolute inset-0 flex items-center">
+                        <Separator />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or continue with email
+                        </span>
+                      </div>
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">
-                        Or continue with email
-                      </span>
-                    </div>
-                  </div>
 
-                  <SignUpForm 
-                    signUpAction={signUp}
-                    message={searchParams?.message}
-                  />
-                </CardContent>
-              </Card>
+                    <SignUpForm 
+                      signUpAction={signUp}
+                      message={searchParams?.message}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

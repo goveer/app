@@ -46,7 +46,7 @@ export function LoginForm({ signInAction, message }: LoginFormProps) {
   return (
     <form action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
+        <label className="text-sm font-medium text-[#2e1065]/80 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
           Enter your email to receive a magic link
         </label>
         <Input
@@ -57,12 +57,13 @@ export function LoginForm({ signInAction, message }: LoginFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="h-11"
         />
       </div>
 
       <SubmitButton
         formAction={async (prevState: any, formData: FormData) => handleSubmit(formData)}
-        className={`w-full bg-[#46296B] hover:bg-[#46296B]/90 ${!isEmailValid || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full bg-[#2e1065] hover:bg-[#2e1065]/90 h-11 ${!isEmailValid || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         effect="shineHover"
         pendingText="Sending Magic Link..."
         disabled={!isEmailValid || isSubmitting}
