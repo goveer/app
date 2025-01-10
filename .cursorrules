@@ -144,17 +144,51 @@ export function Component({ title, className, ...props }: ComponentProps) {
 
 ## Styling System
 
-### Colors & Theme
-- Primary: #46296B
-- Secondary: #F43F5E
-- Background: #FFFFFF
-- Text: #1F2937
+### Design System Implementation
+The project uses a comprehensive design system implemented through custom utility classes and CSS variable overrides. These are defined in the global CSS and Tailwind configuration.
 
-### Typography Scale
-- Headers: "text-2xl font-semibold"
-- Subheaders: "text-lg font-medium"
-- Body: "text-sm"
-- Muted: "text-sm text-muted-foreground"
+### Typography System
+We use semantic utility classes for consistent typography across the application:
+- `text-h1`, `text-h2`, `text-h3` - Heading styles
+- `text-body-lg`, `text-body`, `text-body-sm` - Body text variants
+- `text-subtle` - Muted or secondary text
+- `text-code` - Monospace text for code blocks
+
+### Color System
+Colors are implemented through CSS variables and custom utility classes:
+- Use semantic color utilities like `bg-primary`, `text-secondary`
+- Access theme colors through CSS variables (e.g. `var(--primary)`)
+- State variations like `hover:bg-primary/90` for opacity variants
+
+### Example Implementation
+```tsx
+// Example page component
+export default function Page() {
+  return (
+    <div className="p-6">
+      <h1 className="text-h1">Welcome Back</h1>
+      <p className="text-body-lg mt-2">Here's your overview for today</p>
+      
+      <div className="mt-6">
+        <h2 className="text-h2">Upcoming Appointments</h2>
+        <p className="text-body mt-2">You have 5 appointments scheduled.</p>
+        <p className="text-subtle">Updated 5 minutes ago</p>
+      </div>
+
+      <div className="mt-4 p-4 bg-muted rounded-lg">
+        <p className="text-code">npm install @veer/ui</p>
+      </div>
+    </div>
+  )
+}
+```
+
+### Component Style Guidelines
+- Use semantic class names over direct color values
+- Leverage CSS variables for theme consistency
+- Follow mobile-first responsive patterns
+- Use spacing utilities for consistent layout
+- Implement hover and focus states through utility classes
 
 ### Responsive Design Guidelines
 
