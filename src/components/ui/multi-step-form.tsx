@@ -314,7 +314,9 @@ export function MultiStepForm({
 
   return (
     <div className="w-full max-w-2xl flex flex-col h-[600px]">
-      <StepIndicator currentStep={currentStep} totalSteps={steps.length} />
+      <div className="pt-4 md:pt-0">
+        <StepIndicator currentStep={currentStep} totalSteps={steps.length} />
+      </div>
       <motion.div
         key={currentStep}
         initial={{ x: 20, opacity: 0 }}
@@ -323,7 +325,7 @@ export function MultiStepForm({
         className="flex-1 flex flex-col"
       >
         <div className="h-full flex flex-col">
-          <h2 className="text-2xl font-semibold text-[#46296B] pt-24 pb-12">
+          <h2 className="text-2xl font-semibold text-[#46296B] pt-8 md:pt-24 pb-6 md:pb-12">
             {steps[currentStep].title}
             {steps[currentStep].description && (
               <p className="text-base font-normal text-muted-foreground mt-2">
